@@ -1,0 +1,126 @@
+.sidebar {
+    left: -8rem;
+    width: 8rem;
+}
+.sidebar.on {
+    left: 0;
+}
+.content.on {
+    margin-left: 0 !important;
+}
+.navbar-toggle {
+    left: 9.5rem;
+}
+.search-form-wrap {
+    right: 8rem;
+}
+@media (min-width: 768px) {
+    .outer,
+    .wrap {
+        width: 80rem !important;
+    }
+}
+@media (max-width: 768px) {
+    .tocbot {
+        display: none !important;
+    }
+    .content.on {
+        transform: translateX(8rem);
+    }
+}
+.photo-box {
+    width: 100%;
+    max-width: 1040px;
+    margin: 0 auto;
+    text-align: center;
+}
+.photo-box-item {
+    overflow: hidden;
+    transition: 0.3s ease-in-out;
+    border-radius: 8px;
+    background-color: #ddd;
+}
+.photo-box-item-img img {
+    transition: opacity 500ms ease-in;
+}
+.photo-box-item .caption {
+    visibility: hidden;
+    position: absolute;
+    bottom: 0;
+    padding: 5px;
+    background-color: #000;
+    left: 0;
+    right: 0;
+    margin: 0;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 300;
+    font-family: sans-serif;
+    opacity: 0.7;
+}
+.photo-box-item:hover .caption {
+    visibility: visible;
+}
+.photo-box-item-check img {
+    transition: opacity 500ms ease-in;
+}
+.photo-category-card {
+    overflow: hidden;
+    transition: 0.3s ease-in-out;
+    border-radius: 8px;
+    background-color: #ddd;
+}
+.photo-category-card-img img {
+    transition: opacity 500ms ease-in;
+}
+.photo-category-card .caption {
+    visibility: hidden;
+    position: absolute;
+    bottom: 0;
+    padding: 5px;
+    background-color: #000;
+    left: 0;
+    right: 0;
+    margin: 0;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 300;
+    font-family: sans-serif;
+    opacity: 0.7;
+}
+.photo-category-card:hover .caption {
+    visibility: visible;
+}
+.photo-title-text {
+    line-height: 54px;
+    background-color: #479ac7;
+    color: #fff;
+    font-size: 24px;
+}
+.photo-title-desc {
+    line-height: 20px;
+    background-color: #479ac7;
+    color: #fff;
+    font-size: 12px;
+}
+.photo-back {
+    line-height: 34px;
+    margin-top: 10px;
+    position: absolute;
+    display: inline-block;
+    right: 10px;
+    padding: 10px 10px;
+    border-radius: 4px;
+    background-color: #63b7ff;
+    color: #fff;
+    cursor: pointer;
+}
+.photo-back:hover {
+    background-color: #99c6ff;
+}
+.photo-category-text {
+    line-height: 30px;
+    background-color: #f1fafa;
+    color: #369;
+    font-size: 18px;
+}

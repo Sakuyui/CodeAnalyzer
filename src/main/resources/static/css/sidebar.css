@@ -1,0 +1,13 @@
+.user-img{
+    width: 64px;
+    height: 64px;
+    border-radius: 50px;
+    border-style: solid;
+    border-width: 2px;
+    border-bottom-color: red;
+    border-left-color: #0681d0;
+    border-right-color: #0681d0;
+    border-top-color: #0681d0;
+    box-shadow: 0px -3px 10px 5px rgba(1,209,254,0.5),0px 3px 10px 5px rgba(255,32,0,0.5);
+
+}
