@@ -5,9 +5,18 @@ public class User {
     private String pwd;
     private String uIcon;
     private String nickName;
-    private String uri;
     private String random;
     private String hashPwd;
+    private String phone;
+
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
 
     public String getHashPwd() {
         return hashPwd;
@@ -25,13 +34,6 @@ public class User {
         this.random = random;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
-    }
-
-    public String getUri() {
-        return uri;
-    }
 
     public String getNickName() {
         return nickName;

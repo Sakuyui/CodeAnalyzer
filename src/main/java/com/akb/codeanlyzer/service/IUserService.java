@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 
 
 public interface IUserService {
-    public User tryLogin(String uid, String pwd);
-
+    User tryLogin(String uid, String pwd);
+    int createNewUser(User u);
+    String setUserLoginState(boolean isLogin, String username);
+    boolean checkToken(String token, String userName);
+    User tryLoginByToken(String token, String uid);
 }
 

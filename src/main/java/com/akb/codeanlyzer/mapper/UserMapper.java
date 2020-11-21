@@ -15,7 +15,12 @@ public interface UserMapper{
     })
     User findUserById(@Param("uid") String uid);
 
-    @Insert({"insert into user(uid, icon, nickname, random, pwd, hashpwd) " +
+    @Insert({"insert into user_inf(uid, icon, nickname, random, pwd, hashpwd) " +
             "values(#{userName}, #{uIcon}, #{nickName}, #{random}, #{pwd}, #{hashPwd})"})
-    int add(User user);
+    int addUser(User user);
+
+    @Select("select count(*) from user_inf where uid = #{uid}")
+    int isUserExist(@Param("uid") String uid);
+
+
 }

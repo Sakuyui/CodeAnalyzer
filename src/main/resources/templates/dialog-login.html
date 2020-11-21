@@ -1,0 +1,86 @@
+<link rel="stylesheet" type="text/css" href="../css/main.css">
+
+<div id="loginBox" hidden="hidden">
+    <div class="form row">
+        <div class="form-horizontal col-sm-offset-3 col-md-offset-3" id="login_form">
+            <h3 class="form-title">Login to your account</h3>
+            <div class="col-sm-9 col-md-9">
+                <div class="form-group">
+                    <i class="fa fa-user fa-lg"></i>
+                    <input id="input_username" class="form-control required" type="text" placeholder="Username" name="username" autofocus="autofocus" maxlength="20"/>
+                </div>
+                <div class="form-group">
+                    <i class="fa fa-lock fa-lg"></i>
+                    <input id="input_pwd" class="form-control required" type="password" placeholder="Password" name="password" maxlength="8"/>
+                </div>
+                <div class="form-group">
+
+                    <hr />
+                    <a href="javascript:;" id="register_btn" class="" onclick="switchToReg()">Create an account</a>
+                </div>
+                <div class="form-group">
+                    <input type="submit" class="btn btn-success pull-right" value="Login " onclick="onLoginClick()"/>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="registerBox" hidden="hidden">
+    <div class="form row">
+        <div class="form-horizontal col-sm-offset-3 col-md-offset-3">
+
+            <h3 class="form-title">Create a new account</h3>
+            <div style="width: 100%">
+                <img id="img_userIcon_reg" class="user-img-reg" src="../img/defaultUserImg.png" onclick="upload_icon()" />
+            </div>
+
+
+            <form id="reg_form" style="margin-top: 2%" class="col-sm-9 col-md-9" method="post">
+
+
+
+                <div class="form-group">
+                    <i class="fa fa-user fa-lg"></i>
+                    <input id="input_username_reg" class="form-control required" type="text" placeholder="Username" name="username" autofocus="autofocus" maxlength="20"/>
+                </div>
+                <div class="form-group">
+                    <i class="fa fa-lock fa-lg"></i>
+                    <input id="input_pwd_reg" class="form-control required" type="password" placeholder="Password" name="password" maxlength="20"/>
+                </div>
+
+                <div class="form-group">
+                    <i class="fa fa-lock fa-lg"></i>
+                    <input id="input_nickname_reg" class="form-control required" type="text" placeholder="NickName" name="nickname" maxlength="20"/>
+                </div>
+
+                <div class="form-group">
+                    <i class="fa fa-lock fa-lg"></i>
+                    <input id="input_phone_reg" class="form-control required" type="phone" placeholder="Phone" name="phone" maxlength="20"/>
+                </div>
+
+                <div class="form-group">
+
+                    <hr />
+                    <a href="javascript:;" id="login_btn" class="" onclick="switchToLogin()">Return to login</a>
+                </div>
+                <input type="file" name="file" accept="image/jpg,image/png,image/jpeg,image/gif"
+                       id="icon_choose"    style="display: none"/>
+            </form>
+            <div class="form-group">
+                <input class="btn btn-success pull-right" value="Submit" onclick="onRegButtonClick()"/>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    // mui.init()
+    function upload_icon(){
+        document.getElementById('icon_choose').click()
+    }
+</script>
+
+<script type="text/javascript" src="../js/login-reg.js"></script>
