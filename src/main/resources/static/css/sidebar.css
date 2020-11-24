@@ -24,7 +24,34 @@
     top: 20px;
 
 }
-
+.aside_org{
+    border-radius: 10px;
+    text-align: center;
+    opacity: 0.7;
+    position: absolute;
+    background: rgb(0,0,0);
+    width: 20rem;
+    height: 26rem;
+    transform: scale(1);
+    left: 7.2rem;
+    top: -20px;
+}
+.aside_proj{
+    border-radius: 10px;
+    text-align: center;
+    opacity: 0.7;
+    position: absolute;
+    background: rgb(0,0,0);
+    width: 20rem;
+    height: 26rem;
+    transform: scale(1);
+    left: 7.2rem;
+    top: -20px;
+}
+.aside_org_selected{
+    background-color: #a21a1f;
+    color: red;
+}
 .profile-userImg{
     display:block;
     margin:0 auto;

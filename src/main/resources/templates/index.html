@@ -30,22 +30,8 @@
 
 
 <script>
-    window.onload = function () {
-        $.ajax({
-            url : '/user/tokenLogin',
-            type: 'post',
-            dataType: 'json',
-            contentType: 'json',
-            success(s){
-                var uIconUri = s.uIcon
-                $("#img_userIcon").attr("src", 'db/usericon/' + uIconUri)
-                $("#profile_userImg").attr("src", 'db/usericon/' + uIconUri)
-                $("#profile_username").text(s.username);
-            },
-            error(e){
-                console.log(e)
-            }
-        })
+    window.onload = function (){
+        refreshSideBar()
     }
 
 </script>

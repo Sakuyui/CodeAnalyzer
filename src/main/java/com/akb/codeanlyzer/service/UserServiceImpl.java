@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.websocket.Session;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -53,14 +54,21 @@ public class UserServiceImpl implements IUserService{
 
     @Override
     public boolean checkToken(String token, String userName) {
+        if(token == null || userName == null) return false;
         return tokenHelper.isTokenAvailable(token, userName );
     }
 
     @Override
     public User tryLoginByToken(String token, String uid) {
         if(tokenHelper.isTokenAvailable(token, uid)){
+            tokenHelper.setLogin(token, uid, TokenHelper.expireTime);
             return userMapper.findUserById(uid);
         }
         return null;
+    }
+
+    @Override
+    public List<String> getUserOrgNames(String uid) {
+        return userMapper.getUserOrgNames(uid);
     }
 }

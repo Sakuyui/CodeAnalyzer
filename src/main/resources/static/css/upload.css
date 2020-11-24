@@ -1,0 +1,45 @@
+.upload-warp{
+    height: 100%;
+    margin-top: 16px;
+}
+.cc-content-body{
+    width: inherit;
+    margin-left: 72px;
+    margin-right: 72px;
+}
+.new-link-top-container{
+    position: relative;
+}
+.new-link-top-warp{
+    background: #fff;
+    height: 64px;
+    display: flex;
+    border-bottom: 1px solid #e7e7e7;
+    position: relative;
+}
+
+.new-link-top-warp-activate{
+    color: #00a1d6;
+    border-bottom: 3px solid #00a1d6;
+    font-weight: bolder;
+    line-height: 20px;
+    font-size: 16px;
+    height: 100%;
+    padding-top: 26px;
+    letter-spacing: .5px;
+    margin-left: 40px;
+}
+
+.files-add-button{
+    position: relative;
+    background: #00a1d6;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #fff;
+    text-align: center;
+    line-height: 14px;
+    padding: 13px 0;
+    width: 120px;
+    cursor: pointer;
+    transition: opacity .3s;
+}

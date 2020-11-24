@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 
 public class TokenHelper {
-    public static int expireTime = 60 * 20; //20min
+    public static int expireTime = 20 * 60; //20min
 
 
 

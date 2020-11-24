@@ -3,6 +3,7 @@ package com.akb.codeanlyzer.controller;
 import com.akb.codeanlyzer.pojo.User;
 import com.akb.codeanlyzer.service.UserServiceImpl;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -27,6 +29,20 @@ public class UserController {
     @Autowired
     UserServiceImpl userService;
 
+
+    private JSONObject getUserInfJSONWithOrganizations(User u){
+        if(u == null) return new JSONObject();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("uIcon",u.getuIcon());
+        jsonObject.put("nickname",u.getNickName());
+        List<String> orgNames = userService.getUserOrgNames(u.getUserName());
+        JSONArray orgArray = new JSONArray();
+        for(String name : orgNames){
+            orgArray.add(name) ;
+        }
+        jsonObject.put("onames", orgArray);
+        return jsonObject;
+    }
     @RequestMapping(value = "/login",method = RequestMethod.POST)
     @ResponseBody
     public String tryLogin(@RequestBody JSONObject param, HttpServletRequest request, HttpSession session){
@@ -48,42 +64,56 @@ public class UserController {
 
 
         User u = userService.tryLogin(userName, password);
-        JSONObject jsonObject = new JSONObject();
+        JSONObject jsonObject = getUserInfJSONWithOrganizations(u);
         if(u == null){
             jsonObject.put("state","-1");
+            jsonObject.put("desc", "登入失败");
             return jsonObject.toJSONString();
         }
-        System.out.println(u.getUserName());
+
 
         jsonObject.put("state","200");
-        jsonObject.put("uri",u.getuIcon());
-        jsonObject.put("nickname",u.getUserName());
-
+        jsonObject.put("desc", "OK");
 
         String token = (userService.setUserLoginState(true, u.getUserName()));
 
-        Cookie userIconUriCookie = new Cookie("userIconUri", u.getuIcon());
         session.setAttribute("token_login", token);
         session.setAttribute("username", u.getUserName());
         session.setAttribute("userIconUri", u.getuIcon());
+        session.setAttribute("nickName", u.getNickName());
 
         return jsonObject.toJSONString();
     }
 
     @RequestMapping(value = "/tokenLogin", method = RequestMethod.POST)
     @ResponseBody
-    public User getUserInfByToken(HttpSession session){
+    public String getUserInfByToken(HttpSession session){
         Object t = session.getAttribute("token_login");
         Object uname = session.getAttribute("username");
         User u = new User();
         u.setuIcon("default.jpg");
         System.out.println(t);
-        if(t == null || uname == null) return u;
+        if(t == null || uname == null) {
+            JSONObject object = new JSONObject();
+            object.put("state", -1);
+            object.put("desc", "无token");
+            object.put("uIcon", u.getuIcon());
+            return object.toJSONString();
+        }
         User uw = userService.tryLoginByToken((String)t, (String)uname);
         if (uw!= null){
             u = uw;
+        }else {
+            JSONObject object = new JSONObject();
+            object.put("state", 0);
+            object.put("desc", "token错误");
+            object.put("uIcon", u.getuIcon());
+            return object.toJSONString();
         }
-        return u;
+        JSONObject jsonObject = getUserInfJSONWithOrganizations(u);
+        jsonObject.put("state", 200);
+        jsonObject.put("desc", "OK");
+        return jsonObject.toJSONString();
     }
 
 
@@ -92,6 +122,7 @@ public class UserController {
         Object userName = session.getAttribute("username");
         session.removeAttribute("token_login");
         session.removeAttribute("username");
+        session.removeAttribute("nickName");
         if(userName != null){
             userService.setUserLoginState(false, (String) userName);
         }

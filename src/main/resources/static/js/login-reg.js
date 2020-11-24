@@ -54,8 +54,9 @@ function onLoginClick(){
                 layer.close(loginWinHandler)
                 layer.msg("登入成功",{offset:'t'})
                 console.log(d)
-                document.getElementById("img_userIcon").src = ("/db/usericon/" + d.uri)
-                document.getElementById("profile_userImg").src = ("/db/usericon/" + d.uri)
+                document.getElementById("img_userIcon").src = ("/db/usericon/" + d.uIcon)
+                document.getElementById("profile_userImg").src = ("/db/usericon/" + d.uIcon)
+                sideOrgDisplay(d.onames, 0)
                 location.reload()
             }
         },
@@ -67,6 +68,8 @@ function onLoginClick(){
     })
 
 }
+
+
 
 
 var loginWinHandler = 0;

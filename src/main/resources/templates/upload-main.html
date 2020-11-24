@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" xmlns:th="http://www.thymeleaf.org">
+    <title>CodeAnalyzer - Upload</title>
+    <link rel="stylesheet" type="text/css" href="/css/sidebar.css">
+    <link rel="stylesheet" type="text/css" href="/css/m1.css">
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <link rel="stylesheet" type="text/css" href="/css/c1.css">
+    <link rel="stylesheet" type="text/css" href="/css/upload.css">
+    <script src="/js/jquery-3.5.1.min.js"></script>
+    <script src="/js/jquery.cookie.js"></script>
+    <script src="/layer/layer.js"></script>
+    <script src="/js/siderbar.js"></script>
+
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div id="app-upload">
+        <script>
+            layer.msg('Upload',{offset:'t'});
+        </script>
+        <main>
+            <section class="cover">
+                <div class="cover-frame">
+                    <div id="bg-box" class="bg-box" style="background: #000; opacity: 30%">
+                        <img src="/img/cover2.jpg" style="opacity: 0.6;filter: alpha(opacity=60);">
+                    </div>
+
+                    <div class="text-center text-white" style="position: absolute; top:0; width: 100%;left: 4.8%; height: 5rem; background: #EEEEEE">
+
+                        <div class="text-center text-white" style="position: absolute;  width: 50%; left: 20%; transform: scale(0.7)">
+
+                            <div class="input-group" style="top: 0">
+                                <input type="text" class="form-control input-lg" style="border-radius: 40px">
+                                <span class="input-group-addon btn btn-primary">搜索</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+            </section>
+            <div style="position: absolute; top:6rem; width: 20rem; left: 10rem; width: 92%; height: 90%;background: #dbedff">
+                <div class="new-link-top-warp">
+                    <a class=" new-link-top-warp-activate">
+                        <span>工程上传</span>
+                    </a>
+                </div>
+
+                <div id="file_upload_warp" style="display: flex">
+                    <div id="files-upload-title" style="margin-left: 2%; line-height: 1.15;">
+                        <h4 style="font-weight: bolder; float: left">文件上传</h4>
+                        <div style="float: left;line-height: 1.15">
+                            <div class="files-add-button" style="margin-left: 10px" onmousedown="button_addFiles_onClick()">
+                                <img src="/img/add-icon.png" style="width: 16px; height: 16px">
+                                <span>添加文件</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="files_list_area" style="background: #dedede; width: 95%; height: 40rem; position:absolute; top: 12rem; left: 4rem">
+
+                    </div>
+
+                </div>
+            </div>
+        </main>
+        <div th:include="aside"></div>
+    </div>
+    <input id="hidden_token"  th:value="${session.token_login}" hidden="hidden">
+    <input id="files_input" type="file" multiple="multiple" webkitdirectory>
+</body>
+
+<script>
+    window.onload = function (){
+        refreshSideBar()
+    }
+
+    function button_addFiles_onClick(){
+        $("#files_input").click()
+    }
+
+</script>
+</html>
