@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/css/main.css">
     <link rel="stylesheet" type="text/css" href="/css/c1.css">
     <link rel="stylesheet" type="text/css" href="/css/upload.css">
+
     <script src="/js/jquery-3.5.1.min.js"></script>
     <script src="/js/jquery.cookie.js"></script>
     <script src="/layer/layer.js"></script>
@@ -19,6 +20,14 @@
 
     <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
     <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta/dist/css/bootstrap-select.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta/dist/js/bootstrap-select.min.js"></script>
+
+    <!-- (Optional) Latest compiled and minified JavaScript translation files -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta/dist/js/i18n/defaults-*.min.js"></script>
 </head>
 <body>
     <div id="app-upload">
@@ -63,23 +72,316 @@
                                 <img src="/img/add-icon.png" style="width: 16px; height: 16px">
                                 <span>添加文件</span>
                             </div>
+
+                        </div>
+                        <div class="files-add-button" style="float: left; margin-left: 10px" onmousedown="upLoadFiles()">
+                            <span>开始上传</span>
                         </div>
                     </div>
 
-                    <div id="files_list_area" style="background: #dedede; width: 95%; height: 40rem; position:absolute; top: 12rem; left: 4rem">
-
+                    <div id="files_list_area" class="pre-scrollable" style="width: 95%; height: 40rem; position:absolute; top: 12rem; left: 4rem">
+                        <table class="table table-condensed" id="files_table" >
+                            <caption>文件列表</caption>
+                            <thead>
+                            <tr>
+                                <th>文件名</th>
+                                <th>文件大小</th>
+                                <th>传输速率</th>
+                                <th>传输进度</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>Tanmay</td>
+                                <td>Bangalore</td>
+                                <td>560001</td>
+                                <td>560001</td>
+                            </tr>
+                            <tr>
+                                <td>560001</td>
+                                <td>560001</td>
+                                <td>Sachin</td>
+                                <td>400003</td></tr>
+                            <tr>
+                                <td>560001</td>
+                                <td>560001</td>
+                                <td>Uma</td>
+                                <td>411027</td></tr>
+                            </tbody>
+                        </table>
                     </div>
 
-                </div>
+                    <style type="text/css">
+                        .line_04{
+                            overflow: hidden;
+                            _zoom: 1;
+                            width: 100%;
+                        }
+                        .line_04 b{
+                            background: #a21a1f;
+                            margin-top: 0px;
+                            float: left;
+                            width: 32%;
+                            height: 2px;
+                            _overflow: hidden;
+                        }
+                        .line_04 span{
+                            padding: 0 10px;
+                            width: 32%;
+                            float: left;
+                            text-align: center;
+                        }
+                    </style>
+                    <div class="line_04" style="position: absolute; top: 50rem">
+                        <b></b>
+                        <span>上传信息</span>
+                        <b></b>
+                    </div>
+                    <div class="input-group" style="position: absolute;top: 52rem; width: 35%; margin-left: 20px">
+                        <span class="input-group-addon">工程名:</span>
+                        <input type="text" class="form-control" placeholder="ProjName" id = "input_projName">
+                    </div>
+                    <div style="position: absolute; top:57rem;width: 20%; height: 10%; margin-left: 25px">
+                        <span>组织：</span>
+                        <select class="selectpicker" id="selector_org" >
+                            <div th:each="oname:${session.orgNames}">
+                                <option th:text="${oname}"></option>
+                            </div>
+                        </select>
+                    </div>
+            </div>
             </div>
         </main>
         <div th:include="aside"></div>
     </div>
     <input id="hidden_token"  th:value="${session.token_login}" hidden="hidden">
-    <input id="files_input" type="file" multiple="multiple" webkitdirectory>
+    <input id="hidden_username"  th:value="${session.username}" hidden="hidden">
+    <input id="files_input" style="display: none; visibility: hidden; " hidden="hidden" type="file" multiple="multiple"
+           onchange="handleFiles(this)" webkitdirectory>
 </body>
 
 <script>
+    let currentFiles = []
+    let currentFileNames = []
+
+
+    function orgSelectorDisplay(onames, activateIndex){
+        for(i in onames){
+            innerText += ' <option value="' + (i+1) +'">' ;
+            innerText += onames[i]
+            innerText += "</option>"
+        }
+        $("#selector_org").html(innerText)
+    }
+
+    function upLoadFiles(){
+        if($("#input_projName").val() == ""){
+            layer.msg("请输入工程名")
+            return
+        }
+        //首先发一个开始传输的请求
+        let socket;
+        let webSocketUrl = 'ws://127.0.0.1:9239/upload/' + $("#hidden_username").val() + '/' + $("#selector_org").val() + "/socket"
+        socket = new WebSocket(webSocketUrl);
+
+
+        let transferBeginJson = {
+            type: "transferBegin",
+            projName: $("#input_projName").val(),
+            uToken: upLoadToken,
+        };
+
+        socket.onopen = function (){
+            socket.send(JSON.stringify(transferBeginJson))
+        }
+
+        socket.onmessage = function (msg) {
+            if(msg.data.toString().split(",")[0] == "ok"){
+                console.log("upload token found, begin transfer...")
+
+            }
+        }
+
+        for(let i = 0; i < currentFiles.length; i++){
+            upLoadFile(i)
+        }
+    }
+    function getSpeedStr(bs){
+        if(bs < 1024){
+            return bs.toFixed(2) + "B/s"
+        }else{
+            let kbs = bs / 1024.0;
+            if(kbs < 1024){
+                return kbs.toFixed(2) + "KB/s"
+            }else{
+                let mbs = kbs / 1024.0
+                return mbs.toFixed(2) + "MB/s"
+            }
+        }
+    }
+
+
+    function upLoadFile(fIndex){
+        let socket;
+        let uploadFlag = true;//文件上传的标识
+        let webSocketUrl = 'ws://127.0.0.1:9239/upload/' + $("#hidden_username").val() +'/' + + $("#selector_org").val() + '/socket'
+        console.log('org name = ' + $("#selector_org").val())
+        socket = new WebSocket(webSocketUrl);
+        let paragraph = 2 * 1024 * 1024;
+        let startSize = 0, endSize = 0;//文件的起始大小和文件的结束大小
+        let i = 0;//第几部分文件
+        let SpeedOfProgress = "";//进度
+        let fileObject;
+        fileObject = currentFiles[fIndex]
+
+        let fileJson = {
+            type: "fileName",
+            count: currentFiles.length,
+            curIndex: fIndex + 1,
+            data: fileObject.webkitRelativePath,
+            uToken: upLoadToken
+        };
+
+
+        socket.onopen = function () {
+            console.log("websocket已连接 - 尝试传输" + currentFiles[fIndex].name);
+            socket.send(JSON.stringify(fileJson));
+            uploadFlag = false
+            let time_begin = new Date()
+            socket.onmessage = function (msg){
+                if(uploadFlag == false){
+                    if(msg.data == 'ok'){
+                        if (endSize < fileObject.size) {
+                            console.log(fileObject.size + ',' + startSize + "/" + endSize )
+                            startSize = endSize;
+                            endSize += paragraph;
+                            let time_cur = new Date()
+                            let date_diff = time_cur.getTime() - time_begin.getTime()
+                            let time_str = getSpeedStr(paragraph / (date_diff / 1000.0))
+                            $("#table_speed_" + fIndex).html(time_str)
+                            time_begin = new Date()
+
+                            $("#table_progress_" + fIndex).html(startSize + "/" + fileObject.size)
+                            SpeedOfProgress = Math.round(startSize / fileObject.size * 10000) / 100.00 + "%";
+                            console.log(SpeedOfProgress)
+                            let blob = fileObject.slice(startSize, endSize);
+                            let reader = new FileReader();
+                            reader.readAsArrayBuffer(blob);
+                            reader.onload = function loaded(evt) {
+                                let ArrayBuffer = evt.target.result;
+                                console.log("发送文件第" + (i++) + "部分"+'\n');
+                                let fileObjJson={
+                                    type: "fileCount",
+                                    data: i,
+                                    uFlag: upLoadToken
+                                };
+                                //socket.send(JSON.stringify(fileObjJson));
+                                socket.send(ArrayBuffer);
+                            }
+                        }else {
+                            console.log(fileObject.name + " 传输完成")
+                            $("#table_progress_" + fIndex).html(fileObject.size + "/" + fileObject.size)
+                            msg = {
+                                type : "fileTransferFinish",
+                                uToken : upLoadToken
+                            };
+                            socket.send(JSON.stringify(msg))
+                            socket.close()
+                        }
+                    }
+                }
+            }
+        };
+        socket.onmessage = function (e) {
+            if (uploadFlag) {
+                //服务端发送的消息
+                $("#message_content").append(e.data + '\n');
+            }
+        };
+        socket.onmessage = function (e) {
+            if (uploadFlag) {
+                //服务端发送的消息
+                $("#message_content").append(e.data + '\n');
+            }
+        };
+
+
+        return
+
+        for(let i = 0; i < currentFiles.length; i++){
+            let fd = new FormData()
+            fd.append("file", currentFiles[i])
+            fd.append("relativePath", currentFiles[i].webkitRelativePath)
+            console.log("process file " + i + " " + currentFiles[i].name)
+            $.ajax({
+                url: "/upload/" + $("#hidden_username").val() + "/doUpload",
+                type: 'post',
+                data: fd,
+                processData: false,
+                contentType: false,
+                cache: false,
+                success(s){
+                    console.log("success" + s)
+                },
+                error(e){
+                    console.log("error " + e)
+                }
+            })
+        }
+    }
+
+    function displayFiles(fd){
+        $("#files_table").html("")
+        let s = "  <caption>文件列表</caption><thead> <tr>\n" +
+            "                                <th>文件名</th>\n" +
+            "                                <th>文件大小</th>\n" +
+            "                                <th>传输速率</th>\n" +
+            "                                <th>传输进度</th>\n" +
+            "                            </tr></thead>   <tbody>"
+        for (let i = 0; i < fd.length; i++) {
+            s += "<tr> <td>"
+            s += fd[i].fname + "</td>" + "<td>" + fd[i].fsize + "</td><td id = 'table_speed_" + i + "'>0</td>" +
+                "<td id = 'table_progress_" + i + "'> 0/" + fd[i].fsize +
+                "</tr>"
+        }
+        $("#files_table").html(s)
+    }
+
+    let upLoadToken;
+    function handleFiles(f){
+        console.log("files changed")
+        let files = f.files;
+        let data_files = []
+        console.log(currentFiles)
+        for (let i = 0; i < files.length; i++) {
+            data_files[i] = {"fname" : files[i].webkitRelativePath, "fsize":files[i].size}
+            currentFiles.push(files[i])
+            currentFileNames.push(files[i].name)
+        }
+        displayFiles(data_files)
+
+        let socket;
+        let webSocketUrl = 'ws://127.0.0.1:9239/upload/' + $("#hidden_username").val() +'/' + + $("#selector_org").val() + "/socket"
+        socket = new WebSocket(webSocketUrl);
+
+
+        let fileJson = {
+            type: "setup",
+            count: currentFiles.length,
+            files: JSON.stringify(currentFileNames)
+        };
+
+        socket.onopen = function (){
+            socket.send(JSON.stringify(fileJson))
+        }
+
+        socket.onmessage = function (msg) {
+            upLoadToken = msg.data.toString().split(',')[1]
+            console.log(msg.data.toString().split(',')[1])
+            socket.close()
+        }
+    }
+
     window.onload = function (){
         refreshSideBar()
     }

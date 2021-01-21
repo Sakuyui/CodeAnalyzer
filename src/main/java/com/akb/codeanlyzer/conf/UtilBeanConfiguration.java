@@ -6,8 +6,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class UtilBeanConfiguration {
-    @Bean
-    public TokenHelper tokenHelper(){
-        return new TokenHelper();
-    }
+
+
 }

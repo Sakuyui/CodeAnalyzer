@@ -16,7 +16,7 @@ public class LoginStateFilter implements Filter {
     UserServiceImpl userService;
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        System.out.println("filter affect : " + ((HttpServletRequest) servletRequest).getRequestURI());
+        //System.out.println("filter affect : " + ((HttpServletRequest) servletRequest).getRequestURI());
         HttpSession session = ((HttpServletRequest)servletRequest).getSession();
         String token = (String) session.getAttribute("token_login");
         String userName = (String) session.getAttribute("username");

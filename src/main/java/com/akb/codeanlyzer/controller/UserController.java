@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +31,13 @@ public class UserController {
     UserServiceImpl userService;
 
 
-    private JSONObject getUserInfJSONWithOrganizations(User u){
+    private JSONObject getUserInfJSONWithOrganizations(User u, HttpSession session){
         if(u == null) return new JSONObject();
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("uIcon",u.getuIcon());
         jsonObject.put("nickname",u.getNickName());
         List<String> orgNames = userService.getUserOrgNames(u.getUserName());
+        session.setAttribute("orgNames", orgNames);
         JSONArray orgArray = new JSONArray();
         for(String name : orgNames){
             orgArray.add(name) ;
@@ -64,7 +66,7 @@ public class UserController {
 
 
         User u = userService.tryLogin(userName, password);
-        JSONObject jsonObject = getUserInfJSONWithOrganizations(u);
+        JSONObject jsonObject = getUserInfJSONWithOrganizations(u, session);
         if(u == null){
             jsonObject.put("state","-1");
             jsonObject.put("desc", "登入失败");
@@ -110,7 +112,7 @@ public class UserController {
             object.put("uIcon", u.getuIcon());
             return object.toJSONString();
         }
-        JSONObject jsonObject = getUserInfJSONWithOrganizations(u);
+        JSONObject jsonObject = getUserInfJSONWithOrganizations(u, session);
         jsonObject.put("state", 200);
         jsonObject.put("desc", "OK");
         return jsonObject.toJSONString();

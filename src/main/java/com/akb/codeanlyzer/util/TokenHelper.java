@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
-
+@Component
 public class TokenHelper {
     public static int expireTime = 20 * 60; //20min
-
+    public static int defaultUploadTokenExpireTime = 30;
 
 
 
@@ -22,6 +22,9 @@ public class TokenHelper {
         TokenHelper.expireTime = expireTime;
     }
 
+    public void deleteUToken(String token){
+        redisTemplate.delete(token + "_upload");
+    }
     public void setLogin(String token, String username, int expireT){
         if (redisTemplate.hasKey(username + "_token")){
             redisTemplate.delete(username + "_token");
@@ -45,6 +48,22 @@ public class TokenHelper {
             }
         }
         return false;
+    }
+
+    public boolean putNewUpLoadToken(String token, int expireTime){
+        RedisSerializer serializer = new StringRedisSerializer();
+        if(redisTemplate.hasKey(token)) return false;
+        redisTemplate.setKeySerializer(serializer);
+        redisTemplate.setValueSerializer(serializer);
+        redisTemplate.opsForValue().set(token + "_upload", token, expireTime, TimeUnit.SECONDS);
+        return true;
+    }
+
+
+    public boolean resetSessionTimeOut(String token, int expireTime){
+        if(!redisTemplate.hasKey(token + "_upload")) return false;
+        redisTemplate.expire(token,expireTime,TimeUnit.SECONDS);
+        return true;
     }
 
 

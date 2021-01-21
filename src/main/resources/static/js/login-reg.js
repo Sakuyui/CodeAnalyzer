@@ -30,16 +30,16 @@ function switchToLogin(){
     })
 }
 function onLoginClick(){
-    var uName = $("#input_username").val();
-    var pwd = $("#input_pwd").val()
-    if(uName == "" || pwd == ""){
-        layer.msg("账号或密码不能为空")
+    let uName = $("#input_username").val();
+    let pwd = $("#input_pwd").val();
+    if(uName == "" || pwd == "" || !isContainsSpecialChars(uName) || !isContainsSpecialChars(pwd)){
+        layer.msg("账号或密码错误")
         return
     }
-    var d = {
+    let d = {
         'username': uName,
         'password': pwd
-    }
+    };
     $.ajax({
         url: '/user/login',
         type: 'post',
@@ -47,6 +47,7 @@ function onLoginClick(){
         dataType:"json",
         contentType:"application/json;charset=utf-8",
         success:function (d){
+            console.log(d)
 
             if(d.state == -1){
                 layer.msg("登入失败")
@@ -78,7 +79,7 @@ var registerWinHandler = 0;
 function onUserImgClike(){
     var t = $("#hidden_token").val();
     console.log(t)
-    if(t != ""){
+    if(t !== ""){
         layer.msg("已登入")
         return
     }
@@ -112,6 +113,10 @@ $("#icon_choose").change(function () {//avatar_file  input[file]的ID
     }
 });
 
+function isContainsSpecialChars(s) {
+
+    return /^\w+$/.test(s);
+};
 
 function onRegButtonClick(){
     var uName = $("#input_username_reg").val();
@@ -119,6 +124,10 @@ function onRegButtonClick(){
     var nickname = $("#input_nickname_reg").val();
     if(uName == "" || pwd == "" || nickname == ""){
         layer.msg("注册信息错误")
+        return
+    }
+    if(!isContainsSpecialChars(uName) || !isContainsSpecialChars(pwd) || !isContainsSpecialChars(nickname)){
+        layer.msg("注册信息不能包含特殊字符")
         return
     }
 
