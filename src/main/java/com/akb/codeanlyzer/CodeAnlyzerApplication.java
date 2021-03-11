@@ -1,15 +1,12 @@
 package com.akb.codeanlyzer;
 
-import com.akb.codeanlyzer.mapper.UserMapper;
+import com.akb.codeanlyzer.service.netty.NettyServer;
+import network.SocketClient;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.web.servlet.MultipartAutoConfiguration;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.multipart.MultipartResolver;
 
 
 @SpringBootApplication
@@ -19,7 +16,10 @@ import org.springframework.web.multipart.MultipartResolver;
 public class CodeAnlyzerApplication {
 
     public static void main(String[] args) {
+
+
         SpringApplication.run(CodeAnlyzerApplication.class, args);
+
     }
 
 }

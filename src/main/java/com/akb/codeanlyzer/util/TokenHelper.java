@@ -26,14 +26,14 @@ public class TokenHelper {
         redisTemplate.delete(token + "_upload");
     }
     public void setLogin(String token, String username, int expireT){
-        if (redisTemplate.hasKey(username + "_token")){
-            redisTemplate.delete(username + "_token");
-        }
+        System.out.println("set login");
         RedisSerializer serializer = new StringRedisSerializer();
         redisTemplate.setKeySerializer(serializer);
         redisTemplate.setValueSerializer(serializer);
-
         redisTemplate.opsForValue().set(username + "_token", token, expireTime, TimeUnit.SECONDS);
+
+
+
     }
 
     public void signOut (String username){
@@ -43,6 +43,7 @@ public class TokenHelper {
 
     public boolean isTokenAvailable(String token, String userName){
         if(redisTemplate.hasKey(userName + "_token")){
+            System.out.println("username = " + userName);
             if(redisTemplate.opsForValue().get(userName + "_token").equals(token)){
                 return true;
             }

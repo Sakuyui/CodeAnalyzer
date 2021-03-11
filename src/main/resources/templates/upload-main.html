@@ -91,22 +91,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>Tanmay</td>
-                                <td>Bangalore</td>
-                                <td>560001</td>
-                                <td>560001</td>
-                            </tr>
-                            <tr>
-                                <td>560001</td>
-                                <td>560001</td>
-                                <td>Sachin</td>
-                                <td>400003</td></tr>
-                            <tr>
-                                <td>560001</td>
-                                <td>560001</td>
-                                <td>Uma</td>
-                                <td>411027</td></tr>
+
                             </tbody>
                         </table>
                     </div>
@@ -144,10 +129,12 @@
                     <div style="position: absolute; top:57rem;width: 20%; height: 10%; margin-left: 25px">
                         <span>组织：</span>
                         <select class="selectpicker" id="selector_org" >
+
                             <div th:each="oname:${session.orgNames}">
-                                <option th:text="${oname}"></option>
+                                <option th:value="${oname}" th:text="${oname}"></option>
                             </div>
                         </select>
+                        <input id="isInd" type="checkbox" name="vehicle" value="Car" checked="checked" />个人<br />
                     </div>
             </div>
             </div>
@@ -166,15 +153,25 @@
 
 
     function orgSelectorDisplay(onames, activateIndex){
+        let innerText = '<option value="0">Individual</option>'
         for(i in onames){
+            console.log(i)
             innerText += ' <option value="' + (i+1) +'">' ;
             innerText += onames[i]
             innerText += "</option>"
         }
+        console.log(innerText)
         $("#selector_org").html(innerText)
     }
 
+    let queue_size = 0
+
+
     function upLoadFiles(){
+        var sel = document.getElementById("selector_org");
+        //console.log(sel.selectedIndex)
+        console.log($("#selector_org").val())
+
         if($("#input_projName").val() == ""){
             layer.msg("请输入工程名")
             return
@@ -188,7 +185,8 @@
         let transferBeginJson = {
             type: "transferBegin",
             projName: $("#input_projName").val(),
-            uToken: upLoadToken,
+            orgName : $("input#isInd").is(":checked") ?"individual" : $("#selector_org").val(),
+            uToken: upLoadToken
         };
 
         socket.onopen = function (){
@@ -198,13 +196,13 @@
         socket.onmessage = function (msg) {
             if(msg.data.toString().split(",")[0] == "ok"){
                 console.log("upload token found, begin transfer...")
-
+                for(let i = 0; i < currentFiles.length;i++){
+                    upLoadFile(i)
+                }
             }
         }
 
-        for(let i = 0; i < currentFiles.length; i++){
-            upLoadFile(i)
-        }
+
     }
     function getSpeedStr(bs){
         if(bs < 1024){
@@ -221,12 +219,22 @@
     }
 
 
+
     function upLoadFile(fIndex){
         let socket;
         let uploadFlag = true;//文件上传的标识
-        let webSocketUrl = 'ws://127.0.0.1:9239/upload/' + $("#hidden_username").val() +'/' + + $("#selector_org").val() + '/socket'
-        console.log('org name = ' + $("#selector_org").val())
-        socket = new WebSocket(webSocketUrl);
+        let webSocketUrl = 'ws://127.0.0.1:9239/upload/' + $("#hidden_username").val() +'/' +
+            ($("input#isInd").is(":checked") ?"individual" : $("#selector_org").val()) + '/socket';
+        //console.log('org name = ' +( $("input#isInd").is(":checked") ?"individual" : $("#selector_org").val()))
+
+        socket = new WebSocket(webSocketUrl)
+        socket.onerror = function (e) {
+            console.log(e)
+        }
+
+
+
+
         let paragraph = 2 * 1024 * 1024;
         let startSize = 0, endSize = 0;//文件的起始大小和文件的结束大小
         let i = 0;//第几部分文件
@@ -243,18 +251,28 @@
         };
 
 
+        let queuesize = 0
+
         socket.onopen = function () {
             console.log("websocket已连接 - 尝试传输" + currentFiles[fIndex].name);
+            //首先传输文件信息
             socket.send(JSON.stringify(fileJson));
             uploadFlag = false
             let time_begin = new Date()
+            //真正开始传输
             socket.onmessage = function (msg){
+                if(endSize>= fileObject.size){
+                    $("#table_progress_" + fIndex).html(fileObject.size + "/" + fileObject.size)
+                }
+
                 if(uploadFlag == false){
                     if(msg.data == 'ok'){
+                        console.log("server ok..")
                         if (endSize < fileObject.size) {
                             console.log(fileObject.size + ',' + startSize + "/" + endSize )
                             startSize = endSize;
                             endSize += paragraph;
+                            console.log("end size ->" + endSize)
                             let time_cur = new Date()
                             let date_diff = time_cur.getTime() - time_begin.getTime()
                             let time_str = getSpeedStr(paragraph / (date_diff / 1000.0))
@@ -286,7 +304,9 @@
                                 uToken : upLoadToken
                             };
                             socket.send(JSON.stringify(msg))
+                            console.log("关闭完成socket")
                             socket.close()
+                            delete socket
                         }
                     }
                 }
@@ -384,6 +404,7 @@
 
     window.onload = function (){
         refreshSideBar()
+
     }
 
     function button_addFiles_onClick(){

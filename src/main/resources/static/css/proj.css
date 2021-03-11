@@ -6,5 +6,21 @@
     opacity: 70%;
     margin-left: 5px;
     border-radius: 4%;
+    line-height: 200px;
+    font-size:18px;
+    color:#F00;
+    overflow:hidden;
+    border:2px solid #FF0099;
+    text-align:center;
 
+}
+
+.proj-textarea{
+    background: transparent;
+    border: 0;
+    width: 100%;
+    line-height: 1.5;
+    text-align: center;
+    margin-top: 20%;
+    overflow: hidden;
 }

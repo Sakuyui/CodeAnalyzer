@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload</title>
+</head>
+
+
+<body>
+<input id="files_input" style=" " type="file" multiple="multiple"
+       onchange="handleFiles(this)" webkitdirectory>
+</body>
+
+<script>
+    function handleFiles(f){
+        send_f = f.files [0]
+        console.log(send_f)
+        var v = new FormData()
+        v.append("file", send_f)
+
+        var ws = new WebSocket("ws://127.0.0.1:9898/upload");
+        ws.onopen = function (e) {
+            ws.send(JSON.stringify({
+                oName:"aaa"
+            }))
+            let blob = send_f.slice(0, 8);
+            ws.send(new Blob[blob])
+        }
+    }
+</script>
+
+
+</html>

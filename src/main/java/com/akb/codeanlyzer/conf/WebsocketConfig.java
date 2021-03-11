@@ -29,7 +29,9 @@ public class WebsocketConfig implements ServletContextInitializer {
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         servletContext.addListener(WebAppRootListener.class);
-        servletContext.setInitParameter("org.apache.tomcat.websocket.textBufferSize","51200000");
-        servletContext.setInitParameter("org.apache.tomcat.websocket.binaryBufferSize","51200000");
+        servletContext.setInitParameter("org.apache.tomcat.websocket.textBufferSize","640000");
+        servletContext.setInitParameter("org.apache.tomcat.websocket.binaryBufferSize","6400000");
     }
+
+
 }

@@ -22,6 +22,10 @@ public class UploadController {
 
 
 
+    @RequestMapping(value = "/temp/upload")
+    public String TempUpload(){
+        return "upload";
+    }
 
 
     /**在上传文件前，首先使用这个来请求。发送要上传的文件数量和信息。服务器端检查是否已经存在进行中的上传请求。如果有的话，直接返回状态字。 **/

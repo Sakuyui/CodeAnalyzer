@@ -81,6 +81,8 @@ public class UserController {
 
         session.setAttribute("token_login", token);
         session.setAttribute("username", u.getUserName());
+
+
         session.setAttribute("userIconUri", u.getuIcon());
         session.setAttribute("nickName", u.getNickName());
 

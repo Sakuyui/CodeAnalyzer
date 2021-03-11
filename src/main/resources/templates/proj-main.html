@@ -52,8 +52,14 @@
                 </div>
 
                 <div id="userProjsDiv" style="width: 100%; position: absolute; height: 24%; top: 9rem; left: 5.6%; ">
-                    <div class="proj-block" onmousedown="toCreateProject()"></div>
-                    <div class="proj-block"></div>
+                    <div class="proj-block" onmousedown="toCreateProject()">
+                        <img src="/img/Add.png" style="display: inline-block; overflow: hidden;
+                        height: 30%; width: 20%; margin-top: 0%"/>
+                    </div>
+                    <div id="projects_block" style="width: 100%; height: 100%; text-align: center">
+
+                    </div>
+
                 </div>
             </div>
 
@@ -72,9 +78,61 @@
 <script>
     window.onload = function (){
         refreshSideBar()
+        showProjects()
+    }
+
+    function showProjects(){
+
+        $.ajax({
+            url : '/proj/getProjects',
+            type: 'post',
+            dataType: 'json',
+            contentType: 'json',
+            success(s){
+
+                ind_projects = s.indProjects
+
+                org_projects = s.orgProjects
+
+                block_str = ""
+
+               for(let p in ind_projects){
+                   block_str += '<div class="proj-block" id="proj-block-' + p + '"  onmousedown="enterProject(this)">' +
+                       '<textarea rows="2" class="proj-textarea">' +
+                       ind_projects[p].toString() + '&#10;(individual)</textarea> </div>'
+               }
+               for(let p in org_projects){
+                    block_str += '<div class="proj-block" id="proj-block-' + p + '" onmousedown="enterProject(this)">' +
+                        '<textarea rows="2" class="proj-textarea">' +
+                        org_projects[p].pName.toString() + '&#10;(' + org_projects[p].orgName +')'+'</textarea></div>'
+                }
+
+
+               $("#projects_block").html(block_str)
+            },
+            error(e){
+                console.log(e)
+                alert(e)
+            }
+        })
+
     }
 
 
+
+
+    function enterProject(projectName){
+        let inner = ((projectName.firstChild.innerHTML).split('\n'))
+        let type = (inner[1].replace('(','').replace(')',''))
+        let pName = inner[0]
+        console.log(type)
+        if(type == "individual"){
+            window.location.href = '/proj/p/' + pName + '?ind=1'
+        }else{
+            window.location.href = '/proj/p/' + pName + '?ind=0&org=' + type.toString()
+        }
+
+    }
     function toCreateProject(){
         window.location.href = "/upload/main"
     }

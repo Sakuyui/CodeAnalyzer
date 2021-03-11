@@ -62,6 +62,7 @@ public class WebSocketUploadServer {
         WebSocketUploadServer s = this;
         //从set中删除
         webSocketSet.remove(this);
+
         try{
             session.close();
         }catch (Exception e){}
@@ -69,14 +70,14 @@ public class WebSocketUploadServer {
     }
 
 
-    public void exceptionClose(int code, Session session){
+    public void exceptionClose(int code, Session session, String uid){
         try{
             if(session != null)
                 session.close();
             webSocketSet.remove(this);
             uploadSessionServ.removeUToken(this);
             FileUploadState fileUploadState = UploadManager.getInstance().getFileUploadState(
-                    UploadManager.getInstance().serverUpLoadTokenMap.get(this)
+                    UploadManager.getInstance().serverUpLoadTokenMap.get(uid)
             );
             fileUploadState.setUnavailable(true);
         }catch (Exception e){
@@ -88,6 +89,8 @@ public class WebSocketUploadServer {
          String[] ss1 = s1.replaceAll("\"","").split(",");
          return Arrays.asList(ss1.clone());
     }
+
+    //如果是个人的话orgName = individual
     @OnMessage
     public void onMessage(String message, @PathParam("uid") String uid, @PathParam("orgName") String orgName) throws IOException{
         //前端传过来的消息都是一个json
@@ -142,9 +145,11 @@ public class WebSocketUploadServer {
             String projName = jsonObject.getString("projName");
             //TODO 判断重名工程
             String uToken = jsonObject.getString("uToken");
+            //boolean b = jsonObject.getBoolean("isInd");
             if(!UploadManager.getInstance().isContainsUploadToken(uToken)) { this.sendMessage("error,token error"); return;}
             UploadManager.getInstance().getFileUploadState(uToken).setProjName(projName);
             UploadManager.getInstance().getFileUploadState(uToken).setOrgName(orgName);
+
             //插入cache
             uploadSessionServ.putNewToken(uToken);
             sendMessage("ok,right token");
@@ -159,6 +164,7 @@ public class WebSocketUploadServer {
                 int c = UploadManager.getInstance().finishOneFile(uToken, this);
                 System.out.println("正常结束 - " + uToken + " 剩余文件数:" + c);
                 UploadManager.getInstance().getFileUploadState(uToken).removeTask(this);
+                UploadManager.getInstance().serverUpLoadTokenMap.remove(this);
                 if(UploadManager.getInstance().getFileCountStillNotFinish(uToken) <= 0){
                     System.out.println("所有文件已完成");
                     //TODO: 转移文件
@@ -186,12 +192,13 @@ public class WebSocketUploadServer {
 
 
     @OnMessage
-    public void onMessage(byte[] message, Session session) {
+    public void onMessage(byte[] message, Session session, @PathParam("uid")String uid) {
 
         String token = UploadManager.getInstance().serverUpLoadTokenMap.get(this);
         String file = UploadManager.getInstance().upLoadTokenMap.get(token).getTransferFileName(this);
+        System.out.println(uid +" >> streamm," + " token = " + token +" file = " + file +" " + uploadSessionServ.reSetSessionTimeOut(this) );
         if(!uploadSessionServ.reSetSessionTimeOut(this) || token == null || file == null){
-            exceptionClose(-1, session);
+            exceptionClose(-1, session, uid);
             return;
         }
         System.out.println("data arrived: " + file + " " + token);
