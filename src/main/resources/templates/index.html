@@ -55,11 +55,28 @@
                         <span id="subtitle"></span>
                         <span type="typed-cursor"></span>
                     </div>
+
+
+
+
+
                     <div class="input-group">
-                        <input type="text" class="form-control input-lg">
-                        <span href="/search/byFile" class="input-group-addon btn btn-primary">
-                            <a href="/search/byFile" style="text-decoration: none; color: #000000">搜索</a>
+
+
+                             <input type="text" class="form-control input-lg" >
+
+
+
+                        <span href="/search/byFile" class="input-group-addon btn btn-primary"
+                              style="background-image: url('../img/camera.png') ; background-size: 25px 25px; width: 50px"
+                        onclick="upLoadAFile()">
+
                             </span>
+                        <span href="/search/byFile" class="input-group-addon btn btn-primary">
+
+                            <a href="/search/byFile" style="text-decoration: none; color: #000000;">搜索</a>
+                            </span>
+
                     </div>
                 </div>
             </div>
@@ -86,10 +103,28 @@
             } catch (err) {
                 console.log(err)
             }
+
+            function upLoadAFile(){
+                layer.open({
+                    type: 1,
+                    skin: 'layui-layer-rim', //加上边框
+                    area: ['420px', '240px'], //宽高
+                    title: "上传源代码文件",
+                    content: '<div style="overflow: auto; align-items: center; text-align: center">' +
+
+                        '<img src="./img/upload.png" ' +
+                        'style="height: 40%;width: 40%;overflow: auto; text-align: center" onmousedown="upLoad_select_file()"/>' +
+
+                        '</div>'
+                });
+                //prompt层
+
+                
+            }
         </script>
     </main>
 
-
+    <input type="file" style="display: none;" hidden="hidden">
 
     <div th:include="aside"></div>
 </div>
@@ -101,4 +136,11 @@
 
 
 <input id="hidden_token"  th:value="${session.token_login}" hidden="hidden">
+<input id="source_file_input" type="file" hidden="hidden" style="display: none">
+
+<script>
+    function upLoad_select_file(){
+        $("input#source_file_input").show()
+    }
+</script>
 </html>

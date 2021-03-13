@@ -9,22 +9,313 @@
 <body>
 <input id="files_input" style=" " type="file" multiple="multiple"
        onchange="handleFiles(this)" webkitdirectory>
+<button onclick="upLoadFiles()">upload</button>
 </body>
 
+
 <script>
+    function upLoadFiles(){
+        //首先发一个开始传输的请求
+        let ws;
+        ws = new WebSocket("ws://127.0.0.1:9898/upload");
+        let transferBeginJson = {
+            type: "transfer_begin",
+            pName: "mm",
+            belongName : "12321",
+            isInd : 1,
+            uToken: upLoadToken
+        };
+
+        ws.onopen = function (){
+            ws.send(JSON.stringify(transferBeginJson))
+        }
+
+        ws.onmessage = function (msg) {
+
+            let msg_json = JSON.parse(msg.data)
+            console.log(msg_json.status)
+            if(msg_json.status == 200){
+                console.log("upload token found, begin transfer...")
+                upLoadFile()
+            }
+        }
+    }
+
+    function upLoadFile(){
+        let curIndex = 0
+        console.log("process : " + curIndex)
+        let socket;
+        let uploadFlag = true;//文件上传的标识
+
+        //console.log('org name = ' +( $("input#isInd").is(":checked") ?"individual" : $("#selector_org").val()))
+
+        socket = new WebSocket("ws://127.0.0.1:9898/upload");
+        socket.onerror = function (e) {
+            console.log(e)
+        }
+
+
+
+
+        let paragraph = 2 * 1024 ;
+        let startSize = 0, endSize = 0;//文件的起始大小和文件的结束大小
+        let i = 0;//第几部分文件
+        let SpeedOfProgress = "";//进度
+        let fileObject;
+
+        fileObject = currentFiles[curIndex]
+
+        let fileJson = {
+            type: "file_begin",
+            count: currentFiles.length,
+            curIndex: curIndex + 1,
+            fName: fileObject.webkitRelativePath,
+            uToken: upLoadToken
+        };
+
+        let time_cur = new Date()
+        let time_begin = new Date()
+        let reader = new FileReader();
+        reader.onload = function loaded(evt) {
+            let ArrayBuffer = evt.target.result;
+            console.log("发送"+ curIndex +"文件第" + (i++) + "部分"+'\n');
+            // evt.data是ArrayBuffer
+            // 将其转换为uint8字节流
+            let uint8_msg = new Uint8Array(ArrayBuffer);
+            // 解码成字符串
+            let decodedString = String.fromCharCode.apply(null, uint8_msg);
+
+            d = JSON.stringify({
+                    type: "data",
+                    index : curIndex,
+                    fName : fileObject.webkitRelativePath,
+                    uToken : upLoadToken,
+                    bytes : decodedString
+                }
+            )
+            socket.send(d);
+
+        }
+
+
+        socket.onopen = function () {
+            console.log("open + " + curIndex)
+            console.log("websocket已连接 - 尝试传输" + currentFiles[curIndex].name);
+            //首先传输文件信息 - 第一个文件
+            socket.send(JSON.stringify(fileJson));
+
+
+            uploadFlag = false
+
+            //真正开始传输
+            socket.onmessage = function (msg){
+                console.log(msg)
+                let msg_json = JSON.parse(msg.data)
+                let ack_fName = msg_json.fName;
+                let ack_status = msg_json.status;
+                let ack_type = msg_json.type;
+                console.log(msg_json)
+                if(ack_type == "filebegin_ack"){
+                    console.log("get ack of file begin")
+                    if(ack_status == 200){
+                        //可以开始传文件惹
+                        console.log(fileObject.size + ',' + startSize + "/" + endSize )
+                        startSize = endSize;
+                        endSize += paragraph;
+                        console.log("end size ->" + endSize)
+
+                        let date_diff = time_cur.getTime() - time_begin.getTime()
+                        let time_str = getSpeedStr(paragraph / (date_diff / 1000.0))
+                        time_begin = new Date()
+                        SpeedOfProgress = Math.round(startSize / fileObject.size * 10000) / 100.00 + "%";
+                        //console.log(SpeedOfProgress)
+                        let blob = fileObject.slice(startSize, endSize);
+
+                        //reader = new FileReader()
+                        reader.readAsArrayBuffer(blob);
+                    }else if(ack_status == 201){
+                        alert("All File Finished")
+
+                    }
+                }
+                else if(ack_type == "block_ack"){
+                    if(ack_status == 200){
+                        //服务器已经接受了一块
+
+                        //已经完成一个文件
+                        if(endSize >= fileObject.size){
+                            console.log(fileObject.name + " 传输完成")
+                            //$("#table_progress_" + fIndex).html(fileObject.size + "/" + fileObject.size)
+                            msg = {
+                                type : "fileTransferFinish",
+                                uToken : upLoadToken,
+                                fName: fileObject.webkitRelativePath
+                            };
+                            socket.send(JSON.stringify(msg))
+                            //传输完成
+
+                        }
+                        else{
+                            console.log(fileObject.size + ',' + startSize + "/" + endSize )
+                            startSize = endSize;
+                            endSize += paragraph;
+                            console.log("end size ->" + endSize)
+
+                            let date_diff = time_cur.getTime() - time_begin.getTime()
+                            let time_str = getSpeedStr(paragraph / (date_diff / 1000.0))
+                            time_begin = new Date()
+                            SpeedOfProgress = Math.round(startSize / fileObject.size * 10000) / 100.00 + "%";
+                            //console.log(SpeedOfProgress)
+                            let blob = fileObject.slice(startSize, endSize);
+
+                            //reader = new FileReader()
+                            reader.readAsBinaryString(blob);
+
+                    }
+                    }
+                }
+                else if (ack_type == "finish_ack"){
+                    console.log("finish ack!!")
+                    curIndex += 1
+                    fileObject = currentFiles[curIndex]
+                    fileJson.curIndex = curIndex + 1
+                    fileJson.fName = fileObject.webkitRelativePath
+                    startSize = 0
+                    endSize = 0
+                    i = 0
+                    socket.send(JSON.stringify(fileJson))
+                }
+
+            }
+        };
+        socket.onmessage = function (e) {
+            if (uploadFlag) {
+                //服务端发送的消息
+                $("#message_content").append(e.data + '\n');
+            }
+        };
+        socket.onmessage = function (e) {
+            if (uploadFlag) {
+                //服务端发送的消息
+                $("#message_content").append(e.data + '\n');
+            }
+        };
+
+
+        return
+
+    }
+    function getSpeedStr(bs){
+        if(bs < 1024){
+            return bs.toFixed(2) + "B/s"
+        }else{
+            let kbs = bs / 1024.0;
+            if(kbs < 1024){
+                return kbs.toFixed(2) + "KB/s"
+            }else{
+                let mbs = kbs / 1024.0
+                return mbs.toFixed(2) + "MB/s"
+            }
+        }
+    }
+</script>
+<script>
+    let currentFiles = []
+    let currentFileNames = []
     function handleFiles(f){
+        console.log("files changed")
+        let files = f.files;
+        let data_files = []
+        console.log(currentFiles)
+        for (let i = 0; i < files.length; i++) {
+            data_files[i] = {"fname" : files[i].webkitRelativePath, "fsize":files[i].size}
+            currentFiles.push(files[i])
+            currentFileNames.push(files[i].name)
+        }
+        let setupJson = {
+            type: "setup",
+            count: currentFiles.length,
+            files: JSON.stringify(currentFileNames),
+            uid: "12321"
+        };
+
+        let socket = new WebSocket("ws://127.0.0.1:9898/upload");
+        socket.onopen = function (){
+            socket.send(JSON.stringify(setupJson))
+        }
+        socket.onmessage = function (msg) {
+            upLoadToken = msg.data.toString().split(',')[1]
+            console.log("get token = " + msg.data.toString().split(',')[1])
+            socket.close()
+        }
+
+        return
+
+
         send_f = f.files [0]
+        console.log(send_f.webkitRelativePath)
         console.log(send_f)
         var v = new FormData()
         v.append("file", send_f)
-
+        let f_size = send_f.size
+        let paragraph = 2 * 1024 * 1024
+        let startSize = 0
+        let endSize = 0
+        let i = 0
+        let time_begin = new Date()
         var ws = new WebSocket("ws://127.0.0.1:9898/upload");
         ws.onopen = function (e) {
             ws.send(JSON.stringify({
-                oName:"aaa"
+                type: "file_notify",
+                belongName:"12321",
+                fName: send_f.webkitRelativePath,
+                isInd: 1,
+                pName: "mm"
             }))
-            let blob = send_f.slice(0, 8);
-            ws.send(new Blob[blob])
+
+
+            ws.onmessage = function (msg){
+                rMsg = (JSON.parse(msg.data))
+                if(rMsg.status == 200){
+                    //begin transfer
+                    //alert(11)
+                    if (endSize < f_size.size) {
+                        console.log(f_size + ',' + startSize + "/" + endSize )
+                        startSize = endSize;
+                        endSize += paragraph;
+                        let time_cur = new Date()
+                        let date_diff = time_cur.getTime() - time_begin.getTime()
+                        let time_str = getSpeedStr(paragraph / (date_diff / 1000.0))
+                        time_begin = new Date()
+                        let blob = send_f.slice(startSize, endSize);
+
+                        let reader = new FileReader();
+                        reader.readAsArrayBuffer(blob);
+                        reader.onload = function loaded(evt) {
+                            let ArrayBuffer = evt.target.result;
+                            console.log("发送文件第" + (i++) + "部分"+'\n');
+                            let fileObjJson={
+                                type: "fileCount",
+                                data: i,
+                                uFlag: upLoadToken
+                            };
+                            //socket.send(JSON.stringify(fileObjJson));
+                            ws.send(ArrayBuffer);
+                        }
+                    }else{
+                        console.log(send_f.name + " 传输完成")
+                        msg = {
+                            type : "fileTransferFinish",
+                        };
+                        ws.send(JSON.stringify(msg))
+                        console.log("关闭完成socket")
+                        ws.close()
+                        delete ws
+                    }
+                }
+            }
+            //let blob = send_f.slice(0, 8);
+            //ws.send(new Blob[blob])
         }
     }
 </script>
