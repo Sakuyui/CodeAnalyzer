@@ -16,6 +16,12 @@
 }
 
 
+.result_display_box{
+    box-shadow: 0 0 10px #f00; border:1px solid green;border:none;border-radius: 10px ;
+    position: absolute; top:1rem; width: 20rem;  width: 92%; height: 95%;margin-left: 9.5rem; margin-top: 1.5rem;
+    background-color : rgba(255,255,255,0.6)
+}
+
 .result-display-plane-main{
     margin-left: 10rem;
     margin-top: 10rem;

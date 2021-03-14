@@ -16,122 +16,171 @@
     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script type="text/javascript" src="/try/bootstrap/twitter-bootstrap-v2/docs/assets/js/bootstrap-collapse.js"></script>
+
     <script src="/echarts/echarts.js"></script>
+    <script src="/js/bootstrap-paginator.js"></script>
+    <script th:src="@{/static/jquery-3.4.1.js}"></script>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
 
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.4/dist/bootstrap-table.min.css">
     <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+
     <title>CodeSearchResult</title>
 </head>
 <body style="background: #eeeeee; ">
 
-<div id="displayDiv" style='margin-left: 9.5rem; margin-top: 2rem'>
-    <h1>日语语料库</h1>
-
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#short_search" data-toggle="tab">短单位检索</a></li>
-        <li><a href="#grammarSearch" data-toggle="tab">语法检索</a></li>
-        <li><a href="#searchGrammar" data-toggle="tab">检索语法</a></li>
-        <li><a href="#textVisualize" data-toggle="tab">语料分析以及可视化</a></li>
-        <li><a href="#featureExtract" data-toggle="tab">语料特征提取</a></li>
-    </ul>
-    <div id="mytab-content" class="tab-content">
-
-
-
-        <div class="tab-pane fade in active" id="short_search">
-            <div class="container">
-                <div class="input-group" style="margin-top: 2%">
-                    <input type="text" class="form-control input-lg" >
-                    <span class="input-group-addon btn btn-primary">搜索</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-pane fade" id="grammarSearch" >
-            <div style="margin-top: 1%;">
-                <h4 style="text-align: center">选择要检索的语法</h4>
-                <select id = "selector_Grammar" class="form-control" onclick="selector_grammar_onclike(this)" style="width: 90%;margin-left: 5%;">
-                    <option>1</option>
-                </select>
-
-            </div>
-            <div class="container" style="width: 92%;margin-top: 1%">
-
-                <table class="table table-hover">
-                    <thead>
-                    <tr>
-                        <th>media_id</th>
-                        <th>subtitle_id</th>
-                        <th>Content</th>
-                    </tr>
-                    </thead>
-
-                    <tbody id="tableBody_grammarResult">
-
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="row text-center">
-                <ul class="pagination" id="pageSelector_grammarSearch" >
-
-                </ul>
-            </div>
-
+<section class="cover">
+    <div class="cover-frame">
+        <div id="bg-box" class="bg-box" style="background: #000; opacity: 30%">
+            <img src="/img/cover2.jpg" style="opacity: 0.6;filter: alpha(opacity=60);">
         </div>
 
 
-        <div class="tab-pane fade" id="searchGrammar">
-            <div class="form-group" style="margin-top: 1%;">
-                <div>
-                    <h4 style="margin-left: 1%; display: inline">输入语料进行语料的文法检索</h4>
-                    <button onclick="searchGrammar_onclick(this)" type="button" class="btn btn-primary" style="margin-left:2%;display: inline;text-align: right;">检索</button>
+
+
+    </div>
+
+
+</section>
+
+<div id="outer-container" style="overflow: hidden;">
+    <div id="displayDiv" class="result_display_box" style=" overflow-x: hidden; overflow-y: scroll">
+        <h1 style="text-align: center">文件搜索结果</h1>
+
+        <ul class="nav nav-tabs" style="margin-left: 5px">
+            <li class="active"><a href="#short_search" data-toggle="tab">文件相似度</a></li>
+            <li><a href="#grammarSearch" data-toggle="tab">语法检索</a></li>
+            <li><a href="#searchGrammar" data-toggle="tab">检索语法</a></li>
+            <li><a href="#textVisualize" data-toggle="tab">语料分析以及可视化</a></li>
+            <li><a href="#featureExtract" data-toggle="tab">语料特征提取</a></li>
+        </ul>
+        <div id="mytab-content" class="tab-content" style="">
+
+            <table class="table table-hover"  style="height:2px;">
+                <caption id="result_caption" style="margin-left: 20px; color: #a21a1f">Result /</caption>
+                <thead>
+                <tr>
+                    <th>定位号</th>
+                    <th>文件名</th>
+                    <th>Doc2Vec距离</th>
+                </tr>
+                </thead>
+                <tbody id = "table_body">
+
+
+                </tbody>
+            </table>
+
+
+            <span hidden="hidden" id="result_str" th:text="${session.s_result}"></span>
+
+
+
+
+
+            <div class="tab-pane fade" id="grammarSearch" >
+                <div style="margin-top: 1%;">
+                    <h4 style="text-align: center">选择要检索的语法</h4>
+                    <select id = "selector_Grammar" class="form-control" onclick="selector_grammar_onclike(this)" style="width: 90%;margin-left: 5%;">
+                        <option>1</option>
+                    </select>
+
+                </div>
+                <div class="container" style="width: 92%;margin-top: 1%">
+
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>media_id</th>
+                            <th>subtitle_id</th>
+                            <th>Content</th>
+                        </tr>
+                        </thead>
+
+                        <tbody id="tableBody_grammarResult">
+
+                        </tbody>
+                    </table>
                 </div>
 
-                <textarea id="textInput_searchGrammar" class="form-control" style="margin-left: 2%; width: 96%;margin-top: 1%;" rows="8"></textarea>
+                <div class="row text-center">
+                    <ul class="pagination" id="pageSelector_grammarSearch" >
+
+                    </ul>
+                </div>
+
             </div>
 
 
-            <div class="container">
-                <hr/>
-                <div class="panel-group_searchGrammar" id="result_searchGrammar" role="tablist">
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="headingOne">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse_1">item1</a>
-                            </h4>
-                        </div>
-
-                        <div id="collapse_1" class="panel-collapse collapse" role="tabpanel">
-                            <div class="panel-body">
-                                test
-                            </div>
-                        </div>
+            <div class="tab-pane fade" id="searchGrammar">
+                <div class="form-group" style="margin-top: 1%;">
+                    <div>
+                        <h4 style="margin-left: 1%; display: inline">输入语料进行语料的文法检索</h4>
+                        <button onclick="searchGrammar_onclick(this)" type="button" class="btn btn-primary" style="margin-left:2%;display: inline;text-align: right;">检索</button>
                     </div>
 
+                    <textarea id="textInput_searchGrammar" class="form-control" style="margin-left: 2%; width: 96%;margin-top: 1%;" rows="8"></textarea>
+                </div>
+
+
+                <div class="container">
+                    <hr/>
+                    <div class="panel-group_searchGrammar" id="result_searchGrammar" role="tablist">
+                        <div class="panel panel-default">
+                            <div class="panel-heading" role="tab" id="headingOne">
+                                <h4 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse_1">item1</a>
+                                </h4>
+                            </div>
+
+                            <div id="collapse_1" class="panel-collapse collapse" role="tabpanel">
+                                <div class="panel-body">
+                                    test
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="tab-pane fade" id="textVisualize">
-            <button class="btn btn-primary" style="margin-top: 2%" onclick="ajaxtest()">test</button>
-            <button class="btn btn-primary" style="margin-top: 2%" onclick="ajaxtest2()">test</button>
-            <div class="form-group" style="margin-top: 1%;">
+            <div class="tab-pane fade" id="textVisualize">
+                <button class="btn btn-primary" style="margin-top: 2%" onclick="ajaxtest()">test</button>
+                <button class="btn btn-primary" style="margin-top: 2%" onclick="ajaxtest2()">test</button>
+                <div class="form-group" style="margin-top: 1%;">
+                    <div>
+                        <h4 style="margin-left: 1%; display: inline">输入文本</h4>
+                        <button onclick="visualize_text(this)" type="button" class="btn btn-primary" style="margin-left:2%;display: inline;text-align: right;">处理</button>
+                    </div>
+
+                    <textarea id="textInput_visualization" class="form-control" style="margin-left: 2%; width: 96%;margin-top: 1%;" rows="8"></textarea>
+                </div>
                 <div>
-                    <h4 style="margin-left: 1%; display: inline">输入文本</h4>
-                    <button onclick="visualize_text(this)" type="button" class="btn btn-primary" style="margin-left:2%;display: inline;text-align: right;">处理</button>
+                    <img id="div_wordcloud" style="margin-left:1rem;float:left;width: 80rem;height: 60rem;" src = ""></img>
+                    <div id="main-dom" style="float:left;width: 80rem;height:60rem;"></div>
                 </div>
 
-                <textarea id="textInput_visualization" class="form-control" style="margin-left: 2%; width: 96%;margin-top: 1%;" rows="8"></textarea>
-            </div>
-            <div>
-                <img id="div_wordcloud" style="margin-left:1rem;float:left;width: 80rem;height: 60rem;" src = ""></img>
-                <div id="main-dom" style="float:left;width: 80rem;height:60rem;"></div>
-            </div>
 
-
+            </div>
+            <div class="tab-pane fade" id="featureExtract">特征提取面板</div>
         </div>
-        <div class="tab-pane fade" id="featureExtract">特征提取面板</div>
+
+        <nav style="text-align:  center" >
+            <!--boostrap4 版本-->
+            <ul class="pagination" style="text-align: center" id="nav_page">
+                <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            </ul>
+        </nav>
+
     </div>
 </div>
 
@@ -144,8 +193,15 @@
 
 
 
+<style>
+    .table>tbody>tr>td{
+        border:0px;
+    }
+    div::-webkit-scrollbar { width: 0 !important }
+    div{-ms-overflow-style: none;}
+    div { overflow: -moz-scrollbars-none; }
 
-
+</style>
 
 
 
@@ -163,8 +219,32 @@
 <!--script-->
 <script src="/js/visualization.js"></script>
 <script>
+
+    function generateColor(percent){
+
+    }
+    let result_json = {}
     window.onload = function (){
         refreshSideBar()
+        displayResult()
+
+    }
+    function displayResult(){
+        result_json = JSON.parse($("span#result_str").text())
+        console.log(result_json)
+
+        let s = ''
+        for(var i = 0; i < 20; i++){
+            s += '<tr style="border:0px;background-color:  rgba(237,28,36,'
+                + result_json.dist[i] +
+                ')">\n' +
+                '                <td>' + result_json.location[i] + '</td>\n' +
+                '                <td>' + '</td>\n' +
+                '                <td>' + result_json.dist[i]+'</td>\n' +
+                '            </tr>'
+        }
+        $("#table_body").html(s)
+        $("#result_caption").html("Result " + result_json.page * 20 + " - " + (result_json.page + 1) * 20+ " All:" + result_json.count)
     }
 
 
@@ -173,4 +253,6 @@
     }
 
 </script>
+
+
 </html>
