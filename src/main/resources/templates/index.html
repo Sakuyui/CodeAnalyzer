@@ -124,7 +124,7 @@
         </script>
     </main>
 
-    <input type="file" style="display: none;" hidden="hidden">
+
 
     <div th:include="aside"></div>
 </div>
@@ -136,11 +136,36 @@
 
 
 <input id="hidden_token"  th:value="${session.token_login}" hidden="hidden">
-<input id="source_file_input" type="file" hidden="hidden" style="display: none">
+<input id="source_file_input" accept=".java" type="file" hidden="hidden" style="display: none" onchange="selected_file_change(this)">
 
 <script>
+    function selected_file_change(e){
+
+    }
     function upLoad_select_file(){
-        $("input#source_file_input").show()
+        let f_input = document.getElementById('source_file_input');
+        f_input.onchange = event => {
+            if( event.target.files[0] == undefined){
+                return
+            }
+            let file = event.target.files[0];
+            let formData = new FormData(); //新建一个formData对象
+            formData.append("file", file); //append()方法添加字段
+            let index = layer.confirm("确定上传吗?",{icon:3},function(){
+                $.ajax({
+                    url: "/search/byFile",
+                    type:'post',
+                    data:formData,
+                    processData:false,//必填 必须false 才会避开jq对formdata的默认处理 XMLHttpRequest才会对formdata进行正确处理  否则会报Illegal invocation错误
+                    contentType:false,//必填 必须false 才会加上正确的Content-Type
+                    success:function(res) {
+                        console.log(res)
+                    }
+                })
+            })
+
+        };
+        $("input#source_file_input").click()
     }
 </script>
 </html>

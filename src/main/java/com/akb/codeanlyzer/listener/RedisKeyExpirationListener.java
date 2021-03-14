@@ -7,6 +7,8 @@ import org.springframework.data.redis.listener.KeyExpirationEventMessageListener
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+
 @Component
 public class RedisKeyExpirationListener extends KeyExpirationEventMessageListener {
 
@@ -29,6 +31,13 @@ public class RedisKeyExpirationListener extends KeyExpirationEventMessageListene
             FileUploadState fileUploadState =  UploadManager.getInstance().getFileUploadState(token);
             fileUploadState.setUnavailable(true);
             fileUploadState.rollBack();
+        }if(expiredKey.startsWith("f_uuid_")){
+            //TODO
+            String f_uuid = expiredKey.substring(7);
+            File f = new File("D:\\storage\\upload\\tmp\\" + f_uuid +".java");
+            if(f.exists()){
+                f.delete();
+            }
         }
     }
 }
