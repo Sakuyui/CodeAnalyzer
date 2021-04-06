@@ -26,12 +26,16 @@ public class SearchController {
     RedisTemplate redisTemplate;
     @RequestMapping(value = "/search/byFile")
     @ResponseBody
-    public String SearchByFile(@RequestParam("file") MultipartFile file, @RequestParam(value = "page",defaultValue = "0",required = false)
-                               int page, HttpSession session) {
-        String uuid = UUID.randomUUID().toString();
+    public String SearchByFile(@RequestParam(value = "file", required = false) MultipartFile file, @RequestParam(value = "page",defaultValue = "0",required = false)
+                               int page, HttpSession session, @RequestParam(value = "fUUID", required = false) String fUuid) {
+        String uuid = file != null ? UUID.randomUUID().toString() : fUuid;
+        System.out.println("fuuid = " + uuid + " " + fUuid);
         File f = new File("D:\\storage\\upload\\tmp\\" + uuid  +".java");
         try{
-            file.transferTo(f);
+            if(file != null){
+                file.transferTo(f);
+            }
+
             redisTemplate.opsForValue().set("f_uuid_" + uuid, uuid,300, TimeUnit.SECONDS);
             Map<String, String> param = new HashMap<>();
             param.put("f_uuid", uuid);
@@ -56,6 +60,7 @@ public class SearchController {
             jsonObject.put("status", -1);
             return jsonObject.toJSONString();
         }
+
 
 
     }

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="../gallery/gStyle.css" />
+
+    <script src="/js/jquery-3.5.1.min.js"></script>
+    <script src="/js/jquery.cookie.js"></script>
+    <script src="../layer/layer.js"></script>
+</head>
+<body>
+
+<img src="https://iso.500px.com/wp-content/uploads/2014/07/big-one.jpg" onclick="showPreview()">
+
+
+<!--<h2>双击图片显示大图</h2>
+<div id="container">
+    <div class="zoom_outer">
+        <div id="zoom">
+            <img src="https://iso.500px.com/wp-content/uploads/2014/07/big-one.jpg" alt="zoom">
+        </div>
+    </div>
+
+</div>-->
+
+<script>
+    function showPreview(){
+        layer.open({
+            type: 2,
+            area: ['80%', '90%'],
+            fixed: false, //不固定
+            maxmin: true,
+            title: false,
+            closeBtn: 0,
+            shadeClose: true,
+            btn: false,
+            shade: 0.8,
+            content: '../gallery/gallery.html',
+            success:function (dom) {
+                let $iframeDom=$(dom[0]).find("iframe").eq(0).contents();
+                $iframeDom.find("div#zoom").html('<img id=\'zoom_img\' src="../img/test2.png" alt="zoom" >')
+                console.log($iframeDom.find("div#zoom"))
+            }
+        });
+    }
+</script>
+<!--
+<script>
+
+    function showPreview(){
+        alert(13)
+    }
+
+    var scale = 1,
+        panning = false,
+        pointX = 0,
+        pointY = 0,
+        start = { x: 0, y: 0 },
+        zoom = document.getElementById("zoom");
+
+    function setTransform() {
+        zoom.style.transform = "translate(" + pointX + "px, " + pointY + "px) scale(" + scale + ")";
+    }
+
+    zoom.onmousedown = function (e) {
+        e.preventDefault();
+        start = { x: e.clientX - pointX, y: e.clientY - pointY };
+        panning = true;
+    }
+
+    zoom.onmouseup = function (e) {
+        panning = false;
+    }
+
+    zoom.onmousemove = function (e) {
+        e.preventDefault();
+        if (!panning) {
+            return;
+        }
+        pointX = (e.clientX - start.x);
+        pointY = (e.clientY - start.y);
+        setTransform();
+    }
+
+    zoom.onwheel = function (e) {
+        e.preventDefault();
+        var xs = (e.clientX - pointX) / scale,
+            ys = (e.clientY - pointY) / scale,
+            delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY);
+        (delta > 0) ? (scale *= 1.2) : (scale /= 1.2);
+        pointX = e.clientX - xs * scale;
+        pointY = e.clientY - ys * scale;
+
+        setTransform();
+    }
+</script>
+-->
+
+
+</body>
+</html>

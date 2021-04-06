@@ -12,6 +12,8 @@
     <script src="/js/jquery.cookie.js"></script>
     <script src="/layer/layer.js"></script>
     <script src="/js/siderbar.js"></script>
+    <script src="/echarts/echarts.js"></script>
+
     <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -56,7 +58,7 @@
 
                     <ul class="nav nav-tabs" style="text-align: center">
                         <li class="active"><a href="#short_search" data-toggle="tab">源文件列表</a></li>
-                        <li><a href="#grammarSearch" data-toggle="tab">语法检索</a></li>
+                        <li><a href="#doc2vec" data-toggle="tab">Doc2Vec可视化</a></li>
                         <li><a href="#searchGrammar" data-toggle="tab">检索语法</a></li>
                         <li><a href="#textVisualize" data-toggle="tab">语料分析以及可视化</a></li>
                         <li><a href="#featureExtract" data-toggle="tab">语料特征提取</a></li>
@@ -91,35 +93,16 @@
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="grammarSearch" >
+
+
+                        <div class="tab-pane fade" id="doc2vec"  style="text-align: center">
                             <div style="margin-top: 1%;">
-                                <h4 style="text-align: center; margin-bottom: 1%">选择要检索的语法</h4>
-                                <select id = "selector_Grammar" class="form-control" onclick="selector_grammar_onclike(this)" style="
-                                width: 90%;margin-left: 5%;">
-                                    <option>1</option>
-                                </select>
-                            </div>
-                            <div class="container" style="width: 92%;margin-top: 1%">
-
-                                <table class="table table-hover">
-                                    <thead>
-                                    <tr>
-                                        <th>media_id</th>
-                                        <th>subtitle_id</th>
-                                        <th>Content</th>
-                                    </tr>
-                                    </thead>
-
-                                    <tbody id="tableBody_grammarResult">
-
-                                    </tbody>
-                                </table>
+                                <button type="button" class="btn btn-default" onclick="showWvec2TSNEResult()">显示可视化图像</button>
                             </div>
 
-                            <div class="row text-center">
-                                <ul class="pagination" id="pageSelector_grammarSearch" >
 
-                                </ul>
+                            <div style="text-align: center">
+                                <div id="doc_vec_dom" style="text-align: center;width: 80rem;height:65rem;margin-left: 20%"></div>
                             </div>
 
                         </div>
@@ -156,7 +139,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="textVisualize">
+                        <div class="tab-pane fade" id="textVisualize" style="text-align: center">
                             <button class="btn btn-primary" style="margin-top: 2%" onclick="ajaxtest()">test</button>
                             <button class="btn btn-primary" style="margin-top: 2%" onclick="ajaxtest2()">test</button>
                             <div class="form-group" style="margin-top: 1%;">
@@ -167,9 +150,9 @@
 
                                 <textarea id="textInput_visualization" class="form-control" style="margin-left: 2%; width: 96%;margin-top: 1%;" rows="8"></textarea>
                             </div>
-                            <div>
+                            <div style="text-align: center">
                                 <img id="div_wordcloud" style="margin-left:1rem;float:left;width: 80rem;height: 60rem;" src = ""></img>
-                                <div id="main-dom" style="float:left;width: 80rem;height:60rem;"></div>
+                                <div id="main-dom" style="float:left;width: 80rem;height:60rem; margin-left 30%;"></div>
                             </div>
 
 
@@ -197,7 +180,29 @@
 <input id="hidden_uName"  th:value="${session.username}" hidden="hidden">
 </body>
 
+
 <script>
+
+    function showWvec2TSNEResult(){
+        $.ajax({
+            url : 'http://127.0.0.1:5001/vis/tsne/wvec2',
+            type: 'post',
+            dataType: 'json',
+            contentType: 'json',
+            data:JSON.stringify({
+                "isInd" : $("input#hidden_is_ind").val(),
+                "pName": $("input#hidden_pName").val(),
+                "belongName": $("input#hidden_is_ind").val() == 1? $("input#hidden_uName").val() : $("input#hidden_porg").val()
+            }),
+            success(s){
+                drawWord2Vec(s,1000)
+                console.log(s)
+            },
+            error(e){
+                console.log(e)
+            }
+        })
+    }
     window.onload = function (){
         refreshSideBar()
         showFilesTable()
@@ -425,4 +430,5 @@
         return baseStr1 + bstr + baseStr2
     }
 </script>
+<script src="/js/visualization.js"></script>
 </html>

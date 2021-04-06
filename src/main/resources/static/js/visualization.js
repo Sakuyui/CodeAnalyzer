@@ -1,69 +1,52 @@
 // 基于准备好的dom，初始化echarts实例
-var myChart = echarts.init(document.getElementById('main-dom'));
+let myChart = null
+console.log(document.getElementById('doc_vec_dom'))
+$(document).ready(function (){
+     myChart = echarts.init(document.getElementById('doc_vec_dom'));
+})
+
+
+
+
 //第二步构造数据
-var data1 = [];//数据区域缩放组件
+var data1 = []; //数据区域缩放组件
 var data2 = [];
 var data3 = [];
+
 function drawWord2Vec(res, limit) {
     data1 = []
     data2 = []
     data3 = []
-    data_json = res.data
-    var max_time = res.max_time
-    var min_time = res.min_time
-    for(d in data_json){
+    let data_json = res
+    console.log(data_json)
+   // var max_time = res.max_time
+    //var min_time = res.min_time
+    for(var d = 0; d < data_json.px.length; d++){
         if(d > limit){
             break;
         }
-        var c = parseInt(data_json[d].class)
-        val = data_json[d];
-        if(c == 0){
-            data1.push([parseFloat(data_json[d].vec_x),
-                parseFloat(data_json[d].vec_y),
-                parseInt(data_json[d].times),data_json[d].w,
-                ((val.times - min_time + 1.0) / (max_time - min_time + 1))])
 
-        }else if(c == 1) {
-            data2.push([parseFloat(data_json[d].vec_x),
-                parseFloat(data_json[d].vec_y),
-                parseInt(data_json[d].times),data_json[d].w,
-                ((val[2] - min_time + 1.0) / (max_time - min_time + 1))])
-        }else{
-            data3.push([parseFloat(data_json[d].vec_x),
-                parseFloat(data_json[d].vec_y),
-                parseInt(data_json[d].times),data_json[d].w,
-                ((val[2] - min_time + 1.0) / (max_time - min_time + 1))
-            ])
-        }
+
+        data1.push([parseFloat(data_json.px[d]),
+                parseFloat(data_json.py[d]),
+                d])
     }
 
-    console.log(data1)
+
     //3、配置option项
     //第三步就是使用echarts的option进行参数的配置
-    option = {
+    let option = {
         animation: true,//是否开启动画，默认是开启的，true是开启的,false是关闭的
 
         //图例
         legend: {
             data: [
                 {
-                    name:'scatter2',
+                    name:'scatter',
                     icon:'circle',//强制设置图形长方形
                     textStyle:
                         {color:'red'}//设置文本为红色
                 },
-                {
-                    name:'scatter',
-                    icon:'rectangular',//强制设置图形为长方形
-                    textStyle:
-                        {color:'red'}//设置文本为红色
-                },
-                {
-                    name:'scatter3',
-                    icon:'rectangular',//强制设置图形为长方形
-                    textStyle:
-                        {color:'red'}//设置文本为红色
-                }
             ],
             zlevel:5,//设置Canvas分层 zlevel值不同会被放在不同的动画效果中,传说中z值小的图形会被z值大的图形覆盖
             z:3,//z的级别比zlevel低，传说中z值小的会被z值大的覆盖，但不会重新创建Canvas
@@ -89,12 +72,10 @@ function drawWord2Vec(res, limit) {
             selectedMode:'multiple',//图例的选择模式，默认为开启，也可以设置成single或者multiple
             inactiveColor:'#ccc',//图例关闭时的颜色，默认是'#ccc'
             selected:{
-                'scatter2':true,//设置图例的选中状态
-                'scatter':false,
-                'scatter3':false
+                'scatter': true,
             },
             tooltip: {//图例的tooltip 配置，默认不显示,可以在文件较多的时候开启tooltip对文字进行剪切
-                show: true
+                show: true,
             },
             //backgroundColor:'rgb(128, 128, 128)',//图例的背景颜色，默认为透明的
             //borderColor:'rgb(10, 150, 200)',//图例的边框颜色
@@ -105,6 +86,16 @@ function drawWord2Vec(res, limit) {
 
         //鼠标移上去的提示
         tooltip: {
+            formatter: function(param) {
+
+                const value = param.value;
+                return '<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 12px;padding-bottom: 7px;margin-bottom: 7px;"> '
+                    +'index : ' + value[2] + '</br> ' +
+                    + '( ' + value[0] + ',' + value[1] + ')' +
+                    '</br>' + files[parseInt(param.value[2])] +
+                    '</div>';
+
+            }
         },
 
         //网格
@@ -183,11 +174,11 @@ function drawWord2Vec(res, limit) {
         //visualMap
         visualMap: {
             //type: 'continuous',//类型为连续型。
-            min: 0,//指定 visualMapContinuous 组件的允许的最小值。'min' 必须用户指定。[visualMap.min, visualMax.max] 形成了视觉映射的『定义域』。
-            max: 1000000,//指定 visualMapContinuous 组件的允许的最大值。'max' 必须用户指定。[visualMap.min, visualMax.max] 形成了视觉映射的『定义域』。
+            min: -100,//指定 visualMapContinuous 组件的允许的最小值。'min' 必须用户指定。[visualMap.min, visualMax.max] 形成了视觉映射的『定义域』。
+            max: 100,//指定 visualMapContinuous 组件的允许的最大值。'max' 必须用户指定。[visualMap.min, visualMax.max] 形成了视觉映射的『定义域』。
             //setOption 改变 min、max 时 range 的自适应
             text:['High','Low'],//两端的文本['High', 'Low']
-            range:[0, 800000],//指定手柄对应数值的位置
+            range:[0, 800],//指定手柄对应数值的位置
             calculable:true,//表示是否设置了拖拽用的手柄，如果为false则拖拽结束时，才更新视图。如果为ture则拖拽手柄过程中实时更新图表视图。
             realtime: false,//表示拖拽时是否实时更新
             inverse:false,//是否翻转组件
@@ -299,67 +290,26 @@ function drawWord2Vec(res, limit) {
                         opacity: 0.8,
                         label: {
                             color: '#7B38F8',
+
                             show: true,
                             position: 'top',
                             formatter: function (params, ticket, callback) {
-                                return params.data[3];
+                                return params.data[2];
                             }
                         },
+                        x:data1[0],
+                        y:data1[1],
                         textStyle: { fontSize: 12 }
                     }
                 },
-                symbolSize: function (val) {
-
-                    return ((val[2] - min_time + 1.0) / (max_time - min_time + 1))* 40 ;
-                },
+                symbolSize: 50,
                 data: data1
             },
-            {
-                name: 'scatter2',
-                type: 'scatter',
-                itemStyle: {
-                    normal: {
-                        opacity: 0.8,
-                        label: {
-                            color: '#FF69B4',
-                            show: true,
-                            position: 'top',
-                            formatter: function (params, ticket, callback) {
-                                return params.data[3];
-                            }
-                        }
-                    },
 
-                },
-                symbolSize: function (val) {
 
-                    return ((val[2] - min_time + 1.0) / (max_time - min_time + 1))* 40 ;
-                },
-                data: data2
-            },
-            {
-                name: 'scatter3',
-                type: 'scatter',//散点图
-                itemStyle: {
-                    normal: {
-                        opacity: 0.8,
-                        label: {
-                            color: '#FF69B4',
-                            show: true,
-                            position: 'top',
-                            formatter: function (params, ticket, callback) {
-                                return params.data[3];
-                            }
-                        },
-                    }
-                },
-                symbolSize: function (val) {
-                    return ((val[2] - min_time + 1.0) / (max_time - min_time + 1))* 40 ;
-                },
-                data: data3
-            }
         ]
     };
+
 
     // 使用刚指定的配置项和数据显示图表
     myChart.setOption(option);

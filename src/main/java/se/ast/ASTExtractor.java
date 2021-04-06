@@ -12,6 +12,7 @@ import spoon.reflect.declaration.CtElement;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class ASTExtractor {
@@ -76,7 +77,7 @@ public class ASTExtractor {
     public static JSONObject CreateASTStr(RuleContext ctx, boolean verbose, int indentation) {
         boolean toBeIgnored = !verbose && ctx.getChildCount() == 1 && ctx.getChild(0) instanceof ParserRuleContext;
         String ruleName = Java8Parser.ruleNames[ctx.getRuleIndex()];
-
+        //System.out.println(ruleName);
         if (!toBeIgnored) {
 
             for (int i = 0; i < indentation; i++) {
@@ -104,12 +105,62 @@ public class ASTExtractor {
         return jsonObject;
     }
 
+    public static HashSet<String> pruneNodeType = getPruneNodeTypeSet();
+    public static HashSet<String> getPruneNodeTypeSet(){
+        HashSet<String> tabooSet = new HashSet<>();
+        tabooSet.add("typeImportOnDemandDeclaration");
+        return tabooSet;
+    }
+    public static void dfsANTLRAst(RuleContext ctx, boolean verbose, int d, StringBuilder astString, StringBuilder serializedString){
+        boolean toBeIgnored = !verbose && ctx.getChildCount() == 1 && ctx.getChild(0) instanceof ParserRuleContext;
+
+        String ruleName = Java8Parser.ruleNames[ctx.getRuleIndex()];
+        //System.out.println(ruleName);
+        if (!toBeIgnored) {
+
+            for (int i = 0; i < d; i++) {
+                // System.out.print("--");
+            }
+            astString.append("(" + ruleName);
+            System.out.print("(" + d + ") " + repeatString("-", d) + " ");
+            serializedString.append(ruleName + " ");
+            System.out.println("[" + ruleName + "]" );
+        }
+
+
+        List<String> subTreeStr = new ArrayList<>();
+
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            ParseTree element = ctx.getChild(i);
+            if (element instanceof RuleContext) {
+                if(pruneNodeType.contains(Java8Parser.ruleNames[((RuleContext) element).getRuleIndex()]))
+                    continue;
+                dfsANTLRAst((RuleContext) element, verbose, d + (toBeIgnored ? 0 : 1), astString, serializedString);
+
+            }
+
+        }
+        if(!toBeIgnored)
+        {
+            astString.append(")");
+            //System.out.println("+)");
+        }
+
+
+    }
     public static void dfs(CtElement element, int d){
-        System.out.println("dfs ("+d +") >>: " + element + " with type " + element.getRoleInParent()+"\n" + element.getComments());
+        System.out.println("dfs ("+d +") >>: " +" type = " + repeatString("-", d) + " " + element.getRoleInParent());
         List<CtElement> elements = element.getDirectChildren();
         for(CtElement e: elements){
             dfs(e, d + 1);
         }
+    }
+    public static String repeatString(String s, int times){
+        StringBuilder sb = new StringBuilder("");
+        for(var i = 0; i < times; i++){
+            sb.append(s);
+        }
+        return sb.toString();
     }
 
     public static String readFullFile(String filePath) throws IOException{
