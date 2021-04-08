@@ -11,13 +11,13 @@ import org.antlr.v4.runtime.Token;
 import spoon.Launcher;
 import spoon.reflect.declaration.CtElement;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import static se.ast.ASTExtractor.GetTokenizedSymbolicsNames;
 import static se.ast.ASTExtractor.dfsANTLRAst;
 
 public class ASTRun {
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
         String filePath = "D:\\storage\\upload\\user\\405544641\\JavaA\\DataStructures\\Graphs\\A_Star.java";
         Launcher spoon = new Launcher();
 
@@ -34,6 +34,11 @@ public class ASTRun {
                 "    }\n" +
                 "}\n";
 
+        File testFile =
+                new File("D:\\storage\\java-algorithms-implementation\\src\\com\\jwetherell\\algorithms\\data_structures\\AVLTree.java");
+        FileInputStream fis = new FileInputStream(testFile);
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        code = new String(bis.readAllBytes());
 
         //词条序列部分
         CtElement l = spoon.parseClass(code);
@@ -62,7 +67,9 @@ public class ASTRun {
         StringBuilder ans = new StringBuilder("");
         StringBuilder serialString = new StringBuilder("");
         dfsANTLRAst(ctx, false, 0, ans, serialString);
+        System.out.println("ast : ");
         System.out.println(ans);
+        System.out.println("Serial: ");
         System.out.println(serialString);
         //JSONObject t1 = ASTExtractor.CreateASTStr(ctx, false, 0);
         //System.out.println(t1);

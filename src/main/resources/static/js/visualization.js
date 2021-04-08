@@ -3,6 +3,7 @@ let myChart = null
 console.log(document.getElementById('doc_vec_dom'))
 $(document).ready(function (){
      myChart = echarts.init(document.getElementById('doc_vec_dom'));
+
 })
 
 
@@ -89,13 +90,18 @@ function drawWord2Vec(res, limit) {
             formatter: function(param) {
 
                 const value = param.value;
-                return '<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 12px;padding-bottom: 7px;margin-bottom: 7px;"> '
-                    +'index : ' + value[2] + '</br> ' +
-                    + '( ' + value[0] + ',' + value[1] + ')' +
-                    '</br>' + files[parseInt(param.value[2])] +
+                var str = '<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 12px;padding-bottom: 7px;margin-bottom: 7px;"> '
+                    +'index : ' + value[2] + '</div> <div>'      + '( ' + value[0] + ',' + value[1] + ') </div>' + '<div>' +
+                     files[parseInt(param.value[2])] +
                     '</div>';
 
-            }
+                return str;
+
+
+
+
+            },
+
         },
 
         //网格
@@ -313,7 +319,10 @@ function drawWord2Vec(res, limit) {
 
     // 使用刚指定的配置项和数据显示图表
     myChart.setOption(option);
-
+    myChart.on('click', function (parmas){
+        console.log(parmas.value[2])
+        showSourceCode(parmas.value[2])
+    })
 
 }
 

@@ -10,6 +10,8 @@ public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/db/**").addResourceLocations("file:D:/storage/");
+        registry.addResourceHandler("/ast/**").addResourceLocations("file:D:/storage/treegraph/");
+        registry.addResourceHandler("/himg/**").addResourceLocations("file:D:/storage/hgraph/");
         super.addResourceHandlers(registry);
     }
 }

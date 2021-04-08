@@ -12,6 +12,7 @@ import spoon.reflect.declaration.CtElement;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -105,26 +106,63 @@ public class ASTExtractor {
         return jsonObject;
     }
 
-    public static HashSet<String> pruneNodeType = getPruneNodeTypeSet();
-    public static HashSet<String> getPruneNodeTypeSet(){
-        HashSet<String> tabooSet = new HashSet<>();
-        tabooSet.add("typeImportOnDemandDeclaration");
-        return tabooSet;
+    public static HashSet<String> chooseType;
+
+    static {
+        try {
+            chooseType = getChooseTypeSet();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static HashSet<String> getChooseTypeSet() throws IOException {
+        HashSet<String> chooseSet = new HashSet<>();
+        File f = new File("chooseList.txt");
+        if(!f.exists()){
+            return null;
+        }
+        FileInputStream fis = new FileInputStream(f);
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        String s = new String(bis.readAllBytes());
+
+        List<String> lines = Arrays.asList(s.split("\r\n"));
+        for(String line : lines){
+            System.out.println("<<" + line + ">>");
+            chooseSet.add(line);
+        }
+        System.out.println(chooseSet.size());
+        return chooseSet;
+    }
+    public static String getAst(String code){
+        ANTLRInputStream input = new ANTLRInputStream(code);
+        Java8Lexer lexer = new Java8Lexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+
+        Java8Parser parser = new Java8Parser(tokens);
+        ParserRuleContext ctx = parser.compilationUnit();
+        StringBuilder astStr = new StringBuilder("");
+        StringBuilder serialString = new StringBuilder("");
+        dfsANTLRAst(ctx, false, 0, astStr, serialString);
+        return astStr.toString();
     }
     public static void dfsANTLRAst(RuleContext ctx, boolean verbose, int d, StringBuilder astString, StringBuilder serializedString){
+        String ruleName = Java8Parser.ruleNames[ctx.getRuleIndex()];
         boolean toBeIgnored = !verbose && ctx.getChildCount() == 1 && ctx.getChild(0) instanceof ParserRuleContext;
 
-        String ruleName = Java8Parser.ruleNames[ctx.getRuleIndex()];
+
         //System.out.println(ruleName);
-        if (!toBeIgnored) {
+        if (!toBeIgnored && chooseType.contains(ruleName)) {
 
             for (int i = 0; i < d; i++) {
                 // System.out.print("--");
             }
             astString.append("(" + ruleName);
-            System.out.print("(" + d + ") " + repeatString("-", d) + " ");
+            //System.out.print("(" + d + ") " + repeatString("-", d) + " ");
             serializedString.append(ruleName + " ");
-            System.out.println("[" + ruleName + "]" );
+            //System.out.println("[" + ruleName + "]" );
         }
 
 
@@ -133,14 +171,19 @@ public class ASTExtractor {
         for (int i = 0; i < ctx.getChildCount(); i++) {
             ParseTree element = ctx.getChild(i);
             if (element instanceof RuleContext) {
-                if(pruneNodeType.contains(Java8Parser.ruleNames[((RuleContext) element).getRuleIndex()]))
+
+                /*if(!chooseType.contains(Java8Parser.ruleNames[((RuleContext) element).getRuleIndex()]))
+                {
+                    System.out.println("no " + Java8Parser.ruleNames[((RuleContext) element).getRuleIndex()]);
                     continue;
+                }*/
+
                 dfsANTLRAst((RuleContext) element, verbose, d + (toBeIgnored ? 0 : 1), astString, serializedString);
 
             }
 
         }
-        if(!toBeIgnored)
+        if(!toBeIgnored && chooseType.contains(ruleName))
         {
             astString.append(")");
             //System.out.println("+)");

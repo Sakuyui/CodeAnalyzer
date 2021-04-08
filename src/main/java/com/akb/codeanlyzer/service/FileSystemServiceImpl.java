@@ -2,10 +2,7 @@ package com.akb.codeanlyzer.service;
 
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 
 @Service
 public class FileSystemServiceImpl implements IFileSystemService{
@@ -16,11 +13,35 @@ public class FileSystemServiceImpl implements IFileSystemService{
         try{
             FileInputStream fis = new FileInputStream(f);
             BufferedInputStream bis = new BufferedInputStream(fis);
-
-            return  new String(bis.readAllBytes());
+            String s = new String(bis.readAllBytes());
+            bis.close();
+            fis.close();
+            return  s;
         }catch (IOException e){
             return "";
         }
 
     }
+
+    @Override
+    public void writeStringToFile(String path, String str) {
+        File f = new File(path);
+        if(f.exists())
+            f.delete();
+
+        try{
+            f.createNewFile();
+            FileOutputStream fis = new FileOutputStream(f);
+            BufferedOutputStream bis = new BufferedOutputStream(fis);
+            bis.write(str.getBytes());
+            bis.flush();
+            bis.close();
+            fis.close();
+
+        }catch (IOException e){
+            e.printStackTrace();
+            return;
+        }
+    }
+
 }

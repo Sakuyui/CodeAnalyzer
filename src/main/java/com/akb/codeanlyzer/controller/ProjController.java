@@ -5,12 +5,16 @@ import com.akb.codeanlyzer.service.ProjectService;
 import com.akb.codeanlyzer.service.UserServiceImpl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import network.Tools;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class ProjController {
@@ -18,6 +22,37 @@ public class ProjController {
     public String projMain(@PathVariable String userName, HttpSession session){
 
         return "proj-main";
+    }
+
+
+    @RequestMapping("/proj/img/{pName}/getHierarchy")
+    @ResponseBody
+    public String getHierarchicalClustering(@RequestParam("isInd") int isInd, @PathVariable String pName,
+                                            @RequestParam("belongName") String belongName) throws Exception {
+        JSONObject object = new JSONObject();
+        String basePath = "D:\\storage\\upload\\";
+        String uri =  (isInd == 1? "user\\" :"org\\") + belongName + "\\" + pName + "\\" + pName + "_himg.png";
+        String fullPath = basePath + uri;
+        File imgFile = new File(fullPath);
+        if(imgFile.exists()){
+            object.put("state", 200);
+            return object.toJSONString();
+        }else{
+            Map<String, String> param = new HashMap<>();
+            param.put("isInd", isInd + "");
+            param.put("projName", pName);
+            param.put("belongedName", belongName);
+            //请求python后端
+            String s = Tools.httpRequest("http://127.0.0.1:5001/img/hierarchy",
+                    param, false);
+
+        }
+
+
+
+
+        object.put("state", -1);
+        return object.toJSONString();
     }
 
     @Autowired
